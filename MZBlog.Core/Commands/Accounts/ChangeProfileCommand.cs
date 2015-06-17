@@ -23,13 +23,14 @@ namespace MZBlog.Core.Commands.Accounts
 
         public CommandResult Execute(ChangeProfileCommand command)
         {
-            var author = _db.GetCollection<Author>(DBTableNames.Authors).FindById(command.AuthorId);
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            var author = authorCol.FindById(command.AuthorId);
             if (author == null)
                 return new CommandResult("用户信息不存在");
             author.DisplayName = command.NewDisplayName;
             author.Email = command.NewEmail;
 
-            _db.GetCollection<Author>(DBTableNames.Authors).Update(author);
+            authorCol.Update(author);
             return CommandResult.SuccessResult;
         }
     }

@@ -42,7 +42,8 @@ namespace MZBlog.Core
                 PostKey = key,
                 CreatedTime = DateTime.UtcNow
             };
-            _db.GetCollection<SpamHash>(DBTableNames.SpamHashes).Insert(spamHash);
+            var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+            spamHashCol.Insert(spamHash);
             return tick;
         }
 
@@ -52,13 +53,14 @@ namespace MZBlog.Core
             if (tick.IsNullOrWhitespace())
                 return nonhash;
 
-            var spamHash = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes).FindOne(x => x.PostKey == tick);
+            var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+            var spamHash = spamHashCol.FindOne(x => x.PostKey == tick);
 
             if (spamHash == null || spamHash.Pass || !spamHash.Hash.IsNullOrWhitespace())
                 return nonhash;
 
             spamHash.Hash = new Random().NextDouble().ToString();
-            _db.GetCollection<SpamHash>(DBTableNames.SpamHashes).Update(spamHash);
+            spamHashCol.Update(spamHash);
 
             return spamHash.Hash;
         }
@@ -68,13 +70,14 @@ namespace MZBlog.Core
             if (command.Tick.IsNullOrWhitespace() || command.Hash.IsNullOrWhitespace())
                 return true;
 
-            var spamHash = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes).FindOne(x => x.PostKey == command.Tick);
+            var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+            var spamHash = spamHashCol.FindOne(x => x.PostKey == command.Tick);
 
             if (spamHash == null || spamHash.Pass || spamHash.Hash != command.Hash)
                 return true;
 
             spamHash.Pass = true;
-            _db.GetCollection<SpamHash>(DBTableNames.SpamHashes).Update(spamHash);
+            spamHashCol.Update(spamHash);
             return false;
         }
     }

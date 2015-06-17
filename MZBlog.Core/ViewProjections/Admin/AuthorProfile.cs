@@ -21,7 +21,8 @@ namespace MZBlog.Core.ViewProjections.Admin
 
         public AuthorProfileViewModel Project(string input)
         {
-            var author = _db.GetCollection<Author>(DBTableNames.Authors).FindById(input);
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            var author = authorCol.FindById(input);
             if (author == null)
                 return null;
             return new AuthorProfileViewModel

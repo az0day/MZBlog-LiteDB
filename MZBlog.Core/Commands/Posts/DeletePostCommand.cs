@@ -20,9 +20,10 @@ namespace MZBlog.Core.Commands.Posts
 
         public CommandResult Execute(DeletePostCommand command)
         {
-            _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Delete(x => x.PostId == command.PostId);
-
-            _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Delete(x => x.Id == command.PostId);
+            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+            blogCommentCol.Delete(x => x.PostId == command.PostId);
+            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+            blogPostCol.Delete(x => x.Id == command.PostId);
 
             return CommandResult.SuccessResult;
         }

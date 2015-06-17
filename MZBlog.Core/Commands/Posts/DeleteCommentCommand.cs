@@ -19,7 +19,8 @@ namespace MZBlog.Core.Commands.Posts
 
         public CommandResult Execute(DeleteCommentCommand command)
         {
-            _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Delete(command.CommentId);
+            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+            blogCommentCol.Delete(command.CommentId);
             return CommandResult.SuccessResult;
         }
     }

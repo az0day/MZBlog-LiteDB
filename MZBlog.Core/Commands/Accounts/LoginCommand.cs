@@ -41,9 +41,11 @@ namespace MZBlog.Core.Commands.Accounts
         public LoginCommandResult Execute(LoginCommand loginCommand)
         {
             var hashedPassword = Hasher.GetMd5Hash(loginCommand.Password);
-            if (_db.GetCollection<Author>(DBTableNames.Authors).Count() == 0)
+
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            if (authorCol.Exists(Query.All()))
             {
-                _db.GetCollection<Author>(DBTableNames.Authors).Insert(new Author
+                authorCol.Insert(new Author
                 {
                     Email = "mz@bl.og",
                     DisplayName = "mzblog",
@@ -51,7 +53,7 @@ namespace MZBlog.Core.Commands.Accounts
                     HashedPassword = Hasher.GetMd5Hash("mzblog")
                 });
             }
-            var author = _db.GetCollection<Author>(DBTableNames.Authors).FindOne(x => x.Email == loginCommand.Email && x.HashedPassword == hashedPassword);
+            var author = authorCol.FindOne(x => x.Email == loginCommand.Email && x.HashedPassword == hashedPassword);
 
             if (author != null)
                 return new LoginCommandResult() { Author = author };

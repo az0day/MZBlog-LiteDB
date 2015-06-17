@@ -27,13 +27,14 @@ namespace MZBlog.Core.ViewProjections.Home
 
         public BlogPostDetailsViewModel Project(BlogPostDetailsBindingModel input)
         {
-            var post = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindOne(x => x.TitleSlug == input.Permalink);
+            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+            var post = blogPostCol.FindOne(x => x.TitleSlug == input.Permalink);
             if (post == null)
                 return null;
             post.ViewCount++;
-            _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Update(post);
-
-            var comments = _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Find(x => x.PostId == post.Id)
+            blogPostCol.Update(post);
+            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+            var comments = blogCommentCol.Find(x => x.PostId == post.Id)
                                     .OrderBy(o => o.CreatedTime)
                                     .ToArray();
 

@@ -18,7 +18,8 @@ namespace MZBlog.Core.Tests.Accounts
                 Email = "test@mz.yi",
                 HashedPassword = Hasher.GetMd5Hash("mzblog")
             };
-            _db.GetCollection<Author>(DBTableNames.Authors).Insert(author);
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            authorCol.Insert(author);
             new ChangePasswordCommandInvoker(_db)
                .Execute(new ChangePasswordCommand()
                {
@@ -38,8 +39,8 @@ namespace MZBlog.Core.Tests.Accounts
                 Email = "test@mz.yi",
                 HashedPassword = Hasher.GetMd5Hash("mzblog")
             };
-
-            _db.GetCollection<Author>(DBTableNames.Authors).Insert(author);
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            authorCol.Insert(author);
 
             new ChangePasswordCommandInvoker(_db)
                 .Execute(new ChangePasswordCommand()
@@ -51,12 +52,13 @@ namespace MZBlog.Core.Tests.Accounts
                 })
                 .Success.Should().BeTrue();
 
-            _db.GetCollection<Author>(DBTableNames.Authors).FindById(author.Id).HashedPassword.Should().BeEquivalentTo(Hasher.GetMd5Hash("pswtest"));
+            authorCol.FindById(author.Id).HashedPassword.Should().BeEquivalentTo(Hasher.GetMd5Hash("pswtest"));
         }
 
         ~ChangePasswordCommandTests()
         {
-            _db.GetCollection<Author>(DBTableNames.Authors).Delete(authorId);
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            authorCol.Delete(authorId);
         }
     }
 }

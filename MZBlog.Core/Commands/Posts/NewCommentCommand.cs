@@ -63,8 +63,8 @@ namespace MZBlog.Core.Commands.Posts
                 SiteUrl = command.SiteUrl,
                 CreatedTime = DateTime.UtcNow
             };
-
-            var result = _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Insert(comment);
+            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+            var result = blogCommentCol.Insert(comment);
 
             return CommandResult.SuccessResult;
         }

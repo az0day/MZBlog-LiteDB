@@ -47,8 +47,8 @@ namespace MZBlog.Core.ViewProjections.Admin
         public AllBlogPostsViewModel Project(AllBlogPostsBindingModel input)
         {
             var skip = (input.Page - 1) * input.Take;
-
-            var posts = (from p in _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindAll()
+            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+            var posts = (from p in blogPostCol.FindAll()
                          orderby p.DateUTC descending
                          select p)
                         .Skip(skip)

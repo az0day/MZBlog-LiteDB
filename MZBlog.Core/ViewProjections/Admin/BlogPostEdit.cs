@@ -24,7 +24,8 @@ namespace MZBlog.Core.ViewProjections.Admin
 
         public BlogPostEditViewModel Project(BlogPostEditBindingModel input)
         {
-            var post = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindById(input.PostId);
+            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+            var post = blogPostCol.FindById(input.PostId);
             return new BlogPostEditViewModel { BlogPost = post };
         }
     }

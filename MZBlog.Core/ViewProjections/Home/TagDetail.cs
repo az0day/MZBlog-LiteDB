@@ -16,7 +16,8 @@ namespace MZBlog.Core.ViewProjections.Home
 
         public Tag Project(string input)
         {
-            var tag = _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Name == input);
+            var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
+            var tag = tagCol.FindOne(x => x.Name == input);
             return tag;
         }
     }
@@ -32,8 +33,9 @@ namespace MZBlog.Core.ViewProjections.Home
 
         public IEnumerable<Tag> Project(IEnumerable<string> input)
         {
+            var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
             var tags = from slug in input
-                       select _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Name == slug);
+                       select tagCol.FindOne(x => x.Name == slug);
             return tags;
         }
     }

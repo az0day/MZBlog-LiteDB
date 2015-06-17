@@ -47,8 +47,8 @@ namespace MZBlog.Core.ViewProjections.Admin
         public AllBlogCommentsViewModel Project(AllBlogCommentsBindingModel input)
         {
             var skip = (input.Page - 1) * input.Take;
-
-            var comments = _db.GetCollection<BlogComment>(DBTableNames.BlogComments)
+            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+            var comments = blogCommentCol
                 .Find(Query.All(), skip, input.Take + 1)
                 .OrderByDescending(b => b.CreatedTime)
                 .ToList().AsReadOnly();

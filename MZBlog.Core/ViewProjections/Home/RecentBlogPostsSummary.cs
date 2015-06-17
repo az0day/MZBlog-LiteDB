@@ -33,7 +33,8 @@ namespace MZBlog.Core.ViewProjections.Home
 
         public RecentBlogPostSummaryViewModel Project(RecentBlogPostSummaryBindingModel input)
         {
-            var titles = (from p in _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindAll()
+            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+            var titles = (from p in blogPostCol.FindAll()
                           where p.IsPublished
                           orderby p.PubDate descending
                           select new BlogPostSummary

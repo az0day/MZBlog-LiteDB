@@ -13,7 +13,8 @@ namespace MZBlog.Core.Tests
         {
             var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory);
             _db = new LiteDatabase(dbPath + @"\blog.db");
-            _db.GetCollection<Author>(DBTableNames.Authors).EnsureIndex<string>(x => x.Id);
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            authorCol.EnsureIndex<string>(x => x.Id);
         }
 
         public void Dispose()

@@ -10,7 +10,8 @@ namespace MZBlog.Core.Tests.Accounts
         [Fact]
         public void login_should_success_if_user_in_database()
         {
-            _db.GetCollection<Author>(DBTableNames.Authors).Insert(new Author()
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            authorCol.Insert(new Author()
                     {
                         Email = "test@mz.yi",
                         HashedPassword = Hasher.GetMd5Hash("test")
@@ -33,8 +34,8 @@ namespace MZBlog.Core.Tests.Accounts
                 Email = "username@mz.yi",
                 HashedPassword = Hasher.GetMd5Hash("psw1")
             };
-
-            _db.GetCollection<Author>(DBTableNames.Authors).Insert(documtnt);
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            authorCol.Insert(documtnt);
 
             var loginCommandInvoker = new LoginCommandInvoker(_db);
 

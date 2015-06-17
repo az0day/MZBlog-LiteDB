@@ -36,20 +36,22 @@ namespace MZBlog.Core.Commands.Posts
 
         public CommandResult Execute(EditPostCommand command)
         {
-            var post = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindById(command.PostId);
+            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+            var post = blogPostCol.FindById(command.PostId);
 
             if (post == null)
                 throw new ApplicationException("Post with id: {0} was not found".FormatWith(command.PostId));
             if (post.Tags != null)
             {
+                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
                 foreach (var tag in post.Tags)
                 {
                     var slug = tag.ToSlug();
-                    var tagEntry = _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Slug == slug);
+                    var tagEntry = tagCol.FindOne(x => x.Slug == slug);
                     if (tagEntry != null)
                     {
                         tagEntry.PostCount--;
-                        _db.GetCollection<Tag>(DBTableNames.Tags).Update(tagEntry);
+                        tagCol.Update(tagEntry);
                     }
                 }
             }
@@ -67,10 +69,11 @@ namespace MZBlog.Core.Commands.Posts
             {
                 var tags = command.Tags.Trim().Split(',').Select(s => s.Trim());
                 post.Tags = tags.Select(s => s.ToSlug()).ToArray();
+                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
                 foreach (var tag in tags)
                 {
                     var slug = tag.ToSlug();
-                    var tagEntry = _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Slug == slug);
+                    var tagEntry = tagCol.FindOne(x => x.Slug == slug);
                     if (tagEntry == null)
                     {
                         tagEntry = new Tag
@@ -79,12 +82,12 @@ namespace MZBlog.Core.Commands.Posts
                             Name = tag,
                             PostCount = 1
                         };
-                        _db.GetCollection<Tag>(DBTableNames.Tags).Insert(tagEntry);
+                        tagCol.Insert(tagEntry);
                     }
                     else
                     {
                         tagEntry.PostCount++;
-                        _db.GetCollection<Tag>(DBTableNames.Tags).Update(tagEntry);
+                        tagCol.Update(tagEntry);
                     }
                 }
             }

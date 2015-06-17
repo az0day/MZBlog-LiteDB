@@ -47,8 +47,9 @@ namespace MZBlog.Core.ViewProjections.Home
 
         public RecentBlogPostsViewModel Project(RecentBlogPostsBindingModel input)
         {
+            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
             var skip = (input.Page - 1) * input.Take;
-            var posts = (from p in _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindAll()
+            var posts = (from p in blogPostCol.FindAll()
                          where p.IsPublished
                          orderby p.PubDate descending
                          select p)

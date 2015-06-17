@@ -25,14 +25,15 @@ namespace MZBlog.Core.Commands.Accounts
 
         public CommandResult Execute(ChangePasswordCommand command)
         {
-            var author = _db.GetCollection<Author>(DBTableNames.Authors).FindById(command.AuthorId);
+            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+            var author = authorCol.FindById(command.AuthorId);
             if (Hasher.GetMd5Hash(command.OldPassword) != author.HashedPassword)
             {
                 return new CommandResult("旧密码不正确!");
             }
 
             author.HashedPassword = Hasher.GetMd5Hash(command.NewPassword);
-            _db.GetCollection<Author>(DBTableNames.Authors).Update(author);
+            authorCol.Update(author);
             return CommandResult.SuccessResult;
         }
     }

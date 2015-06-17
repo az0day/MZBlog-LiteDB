@@ -54,10 +54,11 @@ namespace MZBlog.Core.Commands.Posts
             {
                 var tags = command.Tags.Trim().Split(',').Select(s => s.Trim());
                 post.Tags = tags.Select(s => s.ToSlug()).ToArray();
+                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
                 foreach (var tag in tags)
                 {
                     var slug = tag.ToSlug();
-                    var tagEntry = _db.GetCollection<Tag>(DBTableNames.Tags).FindById(slug);
+                    var tagEntry = tagCol.FindById(slug);
                     if (tagEntry == null)
                     {
                         tagEntry = new Tag
@@ -66,19 +67,19 @@ namespace MZBlog.Core.Commands.Posts
                             Name = tag,
                             PostCount = 1
                         };
-                        _db.GetCollection<Tag>(DBTableNames.Tags).Insert(tagEntry);
+                        tagCol.Insert(tagEntry);
                     }
                     else
                     {
                         tagEntry.PostCount++;
-                        _db.GetCollection<Tag>(DBTableNames.Tags).Update(tagEntry);
+                        tagCol.Update(tagEntry);
                     }
                 }
             }
             else
                 post.Tags = new string[] { };
-
-            var result = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Insert(post);
+            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+            var result = blogPostCol.Insert(post);
 
             return CommandResult.SuccessResult;
         }
