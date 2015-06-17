@@ -10,7 +10,7 @@ MZBlog是[衣明志个人博客](http://yimingzhi.net)的开源版本，基于Na
 
 由于我也是第一次接触LiteDB，可能有些用法不正确。请看到的同行不吝赐教。
 
-再次感谢[衣明志](http://yimingzhi.net)大牛。
+再次感谢[衣明志](http://yimingzhi.net),[Mauricio David](https://github.com/mbdavid)。
 
 
 
