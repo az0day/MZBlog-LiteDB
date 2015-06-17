@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,23 +19,23 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class TaggedBlogPostsViewProjection : IViewProjection<TaggedBlogPostsBindingModel, TaggedBlogPostsViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public TaggedBlogPostsViewProjection(DB.AutoBox db)
+        public TaggedBlogPostsViewProjection(LiteDatabase db)
         {
             _db = db;
         }
 
         public TaggedBlogPostsViewModel Project(TaggedBlogPostsBindingModel input)
         {
-            var posts = (from p in _db.Select<BlogPost>("from " + DBTableNames.BlogPosts)
+            var posts = (from p in _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindAll()
                          where p.IsPublished && p.Tags.Contains(input.Tag)
                          orderby p.PubDate descending
                          select p)
                      .ToList();
             if (posts.Count == 0)
                 return null;
-            var tagName = _db.SelectKey<Tag>(DBTableNames.Tags, posts.First().Tags[0]).Name;
+            var tagName = _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Slug == input.Tag).Name;
             return new TaggedBlogPostsViewModel
             {
                 Posts = posts,

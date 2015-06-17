@@ -1,4 +1,5 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
+using MZBlog.Core.Documents;
 
 namespace MZBlog.Core.Commands.Posts
 {
@@ -9,17 +10,16 @@ namespace MZBlog.Core.Commands.Posts
 
     public class DeleteCommentCommandInvoker : ICommandInvoker<DeleteCommentCommand, CommandResult>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public DeleteCommentCommandInvoker(DB.AutoBox db)
+        public DeleteCommentCommandInvoker(LiteDatabase db)
         {
             _db = db;
         }
 
         public CommandResult Execute(DeleteCommentCommand command)
         {
-            _db.Delete(DBTableNames.BlogComments, command.CommentId);
-
+            _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Delete(command.CommentId);
             return CommandResult.SuccessResult;
         }
     }

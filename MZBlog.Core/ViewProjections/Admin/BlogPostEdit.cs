@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 
 namespace MZBlog.Core.ViewProjections.Admin
@@ -15,17 +15,16 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class BlogPostEditViewProjection : IViewProjection<BlogPostEditBindingModel, BlogPostEditViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public BlogPostEditViewProjection(DB.AutoBox db)
+        public BlogPostEditViewProjection(LiteDatabase db)
         {
             _db = db;
         }
 
         public BlogPostEditViewModel Project(BlogPostEditBindingModel input)
         {
-            var post = _db.SelectKey<BlogPost>(DBTableNames.BlogPosts, input.PostId);
-
+            var post = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindById(input.PostId);
             return new BlogPostEditViewModel { BlogPost = post };
         }
     }

@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.Linq;
 
@@ -18,22 +18,22 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class BlogPostDetailsViewProjection : IViewProjection<BlogPostDetailsBindingModel, BlogPostDetailsViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public BlogPostDetailsViewProjection(DB.AutoBox db)
+        public BlogPostDetailsViewProjection(LiteDatabase db)
         {
             _db = db;
         }
 
         public BlogPostDetailsViewModel Project(BlogPostDetailsBindingModel input)
         {
-            var post = _db.Select<BlogPost>("from " + DBTableNames.BlogPosts + " where TitleSlug==?", input.Permalink).FirstOrDefault();
+            var post = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindOne(x => x.TitleSlug == input.Permalink);
             if (post == null)
                 return null;
             post.ViewCount++;
-            _db.Update(DBTableNames.BlogPosts, post);
+            _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Update(post);
 
-            var comments = _db.Select<BlogComment>("from " + DBTableNames.BlogComments + " where PostId ==?", post.Id)
+            var comments = _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Find(x => x.PostId == post.Id)
                                     .OrderBy(o => o.CreatedTime)
                                     .ToArray();
 

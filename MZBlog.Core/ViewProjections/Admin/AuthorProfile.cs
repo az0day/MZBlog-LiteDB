@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 
 namespace MZBlog.Core.ViewProjections.Admin
@@ -12,16 +12,16 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class AuthorProfileViewProjection : IViewProjection<string, AuthorProfileViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public AuthorProfileViewProjection(DB.AutoBox db)
+        public AuthorProfileViewProjection(LiteDatabase db)
         {
             _db = db;
         }
 
         public AuthorProfileViewModel Project(string input)
         {
-            var author = _db.SelectKey<Author>(DBTableNames.Authors, input);
+            var author = _db.GetCollection<Author>(DBTableNames.Authors).FindById(input);
             if (author == null)
                 return null;
             return new AuthorProfileViewModel

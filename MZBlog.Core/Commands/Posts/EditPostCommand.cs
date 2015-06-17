@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using MZBlog.Core.Extensions;
 using System;
@@ -27,16 +27,16 @@ namespace MZBlog.Core.Commands.Posts
 
     public class EditPostCommandInvoker : ICommandInvoker<EditPostCommand, CommandResult>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public EditPostCommandInvoker(DB.AutoBox db)
+        public EditPostCommandInvoker(LiteDatabase db)
         {
             _db = db;
         }
 
         public CommandResult Execute(EditPostCommand command)
         {
-            var post = _db.SelectKey<BlogPost>(DBTableNames.BlogPosts, command.PostId);
+            var post = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindById(command.PostId);
 
             if (post == null)
                 throw new ApplicationException("Post with id: {0} was not found".FormatWith(command.PostId));
@@ -45,11 +45,11 @@ namespace MZBlog.Core.Commands.Posts
                 foreach (var tag in post.Tags)
                 {
                     var slug = tag.ToSlug();
-                    var tagEntry = _db.SelectKey<Tag>(DBTableNames.Tags, slug);
+                    var tagEntry = _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Slug == slug);
                     if (tagEntry != null)
                     {
                         tagEntry.PostCount--;
-                        _db.Update(DBTableNames.Tags, tagEntry);
+                        _db.GetCollection<Tag>(DBTableNames.Tags).Update(tagEntry);
                     }
                 }
             }
@@ -70,7 +70,7 @@ namespace MZBlog.Core.Commands.Posts
                 foreach (var tag in tags)
                 {
                     var slug = tag.ToSlug();
-                    var tagEntry = _db.SelectKey<Tag>(DBTableNames.Tags, slug);
+                    var tagEntry = _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Slug == slug);
                     if (tagEntry == null)
                     {
                         tagEntry = new Tag
@@ -79,18 +79,18 @@ namespace MZBlog.Core.Commands.Posts
                             Name = tag,
                             PostCount = 1
                         };
-                        _db.Insert(DBTableNames.Tags, tagEntry);
+                        _db.GetCollection<Tag>(DBTableNames.Tags).Insert(tagEntry);
                     }
                     else
                     {
                         tagEntry.PostCount++;
-                        _db.Update(DBTableNames.Tags, tagEntry);
+                        _db.GetCollection<Tag>(DBTableNames.Tags).Update(tagEntry);
                     }
                 }
             }
             else
                 post.Tags = new string[] { };
-            _db.Update(DBTableNames.BlogPosts, post);
+            _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Update(post);
 
             return CommandResult.SuccessResult;
         }

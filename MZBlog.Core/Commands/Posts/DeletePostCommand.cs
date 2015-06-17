@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.Linq;
 
@@ -11,23 +11,19 @@ namespace MZBlog.Core.Commands.Posts
 
     public class DeletePostCommandInvoker : ICommandInvoker<DeletePostCommand, CommandResult>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public DeletePostCommandInvoker(DB.AutoBox db)
+        public DeletePostCommandInvoker(LiteDatabase db)
         {
             _db = db;
         }
 
         public CommandResult Execute(DeletePostCommand command)
         {
-            var comments = _db.Select<BlogComment>("from " + DBTableNames.BlogComments + " where PostId==?", command.PostId);
+            _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Delete(x => x.PostId == command.PostId);
 
-            if (comments.Count() > 0)
-            {
-                var commentKeys = comments.Select(s => s.Id).ToArray();
-                _db.Delete(DBTableNames.BlogComments, commentKeys);
-            }
-            _db.Delete(DBTableNames.BlogPosts, command.PostId);
+            _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Delete(x => x.Id == command.PostId);
+
             return CommandResult.SuccessResult;
         }
     }

@@ -5,12 +5,12 @@ using Xunit;
 
 namespace MZBlog.Core.Tests.Accounts
 {
-    public class LoginCommandTests : iBoxDBBackedTest
+    public class LoginCommandTests : LiteDBBackedTest
     {
         [Fact]
         public void login_should_success_if_user_in_database()
         {
-            _db.Insert(DBTableNames.Authors, new Author()
+            _db.GetCollection<Author>(DBTableNames.Authors).Insert(new Author()
                     {
                         Email = "test@mz.yi",
                         HashedPassword = Hasher.GetMd5Hash("test")
@@ -34,7 +34,7 @@ namespace MZBlog.Core.Tests.Accounts
                 HashedPassword = Hasher.GetMd5Hash("psw1")
             };
 
-            _db.Insert(DBTableNames.Authors, documtnt);
+            _db.GetCollection<Author>(DBTableNames.Authors).Insert(documtnt);
 
             var loginCommandInvoker = new LoginCommandInvoker(_db);
 

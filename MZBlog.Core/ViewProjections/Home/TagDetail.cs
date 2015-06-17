@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,25 +7,25 @@ namespace MZBlog.Core.ViewProjections.Home
 {
     public class TagDetailViewProjection : IViewProjection<string, Tag>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public TagDetailViewProjection(DB.AutoBox db)
+        public TagDetailViewProjection(LiteDatabase db)
         {
             _db = db;
         }
 
         public Tag Project(string input)
         {
-            var tag = _db.SelectKey<Tag>(DBTableNames.Tags, input);
+            var tag = _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Name == input);
             return tag;
         }
     }
 
     public class TagsViewProjection : IViewProjection<IEnumerable<string>, IEnumerable<Tag>>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public TagsViewProjection(DB.AutoBox db)
+        public TagsViewProjection(LiteDatabase db)
         {
             _db = db;
         }
@@ -33,7 +33,7 @@ namespace MZBlog.Core.ViewProjections.Home
         public IEnumerable<Tag> Project(IEnumerable<string> input)
         {
             var tags = from slug in input
-                       select _db.SelectKey<Tag>(DBTableNames.Tags, slug);
+                       select _db.GetCollection<Tag>(DBTableNames.Tags).FindOne(x => x.Name == slug);
             return tags;
         }
     }

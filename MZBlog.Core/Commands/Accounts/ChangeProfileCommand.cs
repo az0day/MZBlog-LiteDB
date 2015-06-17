@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 
 namespace MZBlog.Core.Commands.Accounts
@@ -14,22 +14,22 @@ namespace MZBlog.Core.Commands.Accounts
 
     public class ChangeProfileCommandInvoker : ICommandInvoker<ChangeProfileCommand, CommandResult>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public ChangeProfileCommandInvoker(DB.AutoBox db)
+        public ChangeProfileCommandInvoker(LiteDatabase db)
         {
             _db = db;
         }
 
         public CommandResult Execute(ChangeProfileCommand command)
         {
-            var author = _db.SelectKey<Author>(DBTableNames.Authors, command.AuthorId);
+            var author = _db.GetCollection<Author>(DBTableNames.Authors).FindById(command.AuthorId);
             if (author == null)
                 return new CommandResult("用户信息不存在");
             author.DisplayName = command.NewDisplayName;
             author.Email = command.NewEmail;
 
-            _db.Update(DBTableNames.Authors, author);
+            _db.GetCollection<Author>(DBTableNames.Authors).Update(author);
             return CommandResult.SuccessResult;
         }
     }

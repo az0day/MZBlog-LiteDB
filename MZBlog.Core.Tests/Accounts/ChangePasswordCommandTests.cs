@@ -5,7 +5,7 @@ using Xunit;
 
 namespace MZBlog.Core.Tests.Accounts
 {
-    public class ChangePasswordCommandTests : iBoxDBBackedTest
+    public class ChangePasswordCommandTests : LiteDBBackedTest
     {
         private string authorId = "mzyi";
 
@@ -18,7 +18,7 @@ namespace MZBlog.Core.Tests.Accounts
                 Email = "test@mz.yi",
                 HashedPassword = Hasher.GetMd5Hash("mzblog")
             };
-            _db.Insert(DBTableNames.Authors, author);
+            _db.GetCollection<Author>(DBTableNames.Authors).Insert(author);
             new ChangePasswordCommandInvoker(_db)
                .Execute(new ChangePasswordCommand()
                {
@@ -39,7 +39,7 @@ namespace MZBlog.Core.Tests.Accounts
                 HashedPassword = Hasher.GetMd5Hash("mzblog")
             };
 
-            _db.Insert(DBTableNames.Authors, author);
+            _db.GetCollection<Author>(DBTableNames.Authors).Insert(author);
 
             new ChangePasswordCommandInvoker(_db)
                 .Execute(new ChangePasswordCommand()
@@ -51,12 +51,12 @@ namespace MZBlog.Core.Tests.Accounts
                 })
                 .Success.Should().BeTrue();
 
-            _db.SelectKey<Author>(DBTableNames.Authors, author.Id).HashedPassword.Should().BeEquivalentTo(Hasher.GetMd5Hash("pswtest"));
+            _db.GetCollection<Author>(DBTableNames.Authors).FindById(author.Id).HashedPassword.Should().BeEquivalentTo(Hasher.GetMd5Hash("pswtest"));
         }
 
         ~ChangePasswordCommandTests()
         {
-            _db.Delete(DBTableNames.Authors, authorId);
+            _db.GetCollection<Author>(DBTableNames.Authors).Delete(authorId);
         }
     }
 }

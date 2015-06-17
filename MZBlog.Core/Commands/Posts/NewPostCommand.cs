@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using MZBlog.Core.Extensions;
 using System;
@@ -26,9 +26,9 @@ namespace MZBlog.Core.Commands.Posts
 
     public class NewPostCommandInvoker : ICommandInvoker<NewPostCommand, CommandResult>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public NewPostCommandInvoker(DB.AutoBox db)
+        public NewPostCommandInvoker(LiteDatabase db)
         {
             _db = db;
         }
@@ -57,7 +57,7 @@ namespace MZBlog.Core.Commands.Posts
                 foreach (var tag in tags)
                 {
                     var slug = tag.ToSlug();
-                    var tagEntry = _db.SelectKey<Tag>(DBTableNames.Tags, slug);
+                    var tagEntry = _db.GetCollection<Tag>(DBTableNames.Tags).FindById(slug);
                     if (tagEntry == null)
                     {
                         tagEntry = new Tag
@@ -66,19 +66,19 @@ namespace MZBlog.Core.Commands.Posts
                             Name = tag,
                             PostCount = 1
                         };
-                        _db.Insert(DBTableNames.Tags, tagEntry);
+                        _db.GetCollection<Tag>(DBTableNames.Tags).Insert(tagEntry);
                     }
                     else
                     {
                         tagEntry.PostCount++;
-                        _db.Update(DBTableNames.Tags, tagEntry);
+                        _db.GetCollection<Tag>(DBTableNames.Tags).Update(tagEntry);
                     }
                 }
             }
             else
                 post.Tags = new string[] { };
 
-            var result = _db.Insert(DBTableNames.BlogPosts, post);
+            var result = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Insert(post);
 
             return CommandResult.SuccessResult;
         }

@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,16 +24,16 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class RecentBlogPostSummaryViewProjection : IViewProjection<RecentBlogPostSummaryBindingModel, RecentBlogPostSummaryViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public RecentBlogPostSummaryViewProjection(DB.AutoBox db)
+        public RecentBlogPostSummaryViewProjection(LiteDatabase db)
         {
             _db = db;
         }
 
         public RecentBlogPostSummaryViewModel Project(RecentBlogPostSummaryBindingModel input)
         {
-            var titles = (from p in _db.Select<BlogPost>("from " + DBTableNames.BlogPosts)
+            var titles = (from p in _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindAll()
                           where p.IsPublished
                           orderby p.PubDate descending
                           select new BlogPostSummary

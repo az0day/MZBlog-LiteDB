@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -36,10 +36,10 @@ namespace MZBlog.Core.Commands.Posts
 
     public class NewCommentCommandInvoker : ICommandInvoker<NewCommentCommand, CommandResult>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
         private readonly ISpamShieldService _spamShield;
 
-        public NewCommentCommandInvoker(DB.AutoBox db, ISpamShieldService spamShield)
+        public NewCommentCommandInvoker(LiteDatabase db, ISpamShieldService spamShield)
         {
             _db = db;
             _spamShield = spamShield;
@@ -64,7 +64,7 @@ namespace MZBlog.Core.Commands.Posts
                 CreatedTime = DateTime.UtcNow
             };
 
-            var result = _db.Insert(DBTableNames.BlogComments, comment);
+            var result = _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Insert(comment);
 
             return CommandResult.SuccessResult;
         }

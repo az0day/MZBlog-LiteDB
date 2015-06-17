@@ -1,6 +1,7 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MZBlog.Core.ViewProjections.Home
 {
@@ -24,9 +25,9 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class TagCloudViewProjection : IViewProjection<TagCloudBindingModel, TagCloudViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public TagCloudViewProjection(DB.AutoBox db)
+        public TagCloudViewProjection(LiteDatabase db)
         {
             _db = db;
         }
@@ -34,7 +35,7 @@ namespace MZBlog.Core.ViewProjections.Home
         public TagCloudViewModel Project(TagCloudBindingModel input)
         {
             var result = new Dictionary<Tag, int>();
-            var tags = _db.Select<Tag>("from " + DBTableNames.Tags +" order by PostCount desc");
+            var tags = _db.GetCollection<Tag>(DBTableNames.Tags).FindAll().OrderByDescending(x => x.PostCount);
 
             return new TagCloudViewModel
             {

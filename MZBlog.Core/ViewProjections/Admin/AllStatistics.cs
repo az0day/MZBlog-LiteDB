@@ -1,4 +1,5 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
+using MZBlog.Core.Documents;
 
 namespace MZBlog.Core.ViewProjections.Admin
 {
@@ -23,26 +24,26 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class AllStatisticsViewProjection : IViewProjection<AllStatisticsBindingModel, AllStatisticsViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public AllStatisticsViewProjection(DB.AutoBox db)
+        public AllStatisticsViewProjection(LiteDatabase db)
         {
             _db = db;
         }
 
         public AllStatisticsViewModel Project(AllStatisticsBindingModel input)
         {
-            var postCount = _db.SelectCount("from " + DBTableNames.BlogPosts);
+            var postCount = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Count();
             if (postCount == 0)
                 return new AllStatisticsViewModel();
 
             var stat = new AllStatisticsViewModel
             {
                 PostsCount = postCount,
-                CommentsCount = _db.SelectCount("from " + DBTableNames.BlogComments)
+                CommentsCount = _db.GetCollection<BlogComment>(DBTableNames.BlogComments).Count()
             };
 
-            stat.TagsCount = (int)_db.SelectCount("from " + DBTableNames.Tags);
+            stat.TagsCount = _db.GetCollection<Tag>(DBTableNames.Tags).Count();
 
             return stat;
         }

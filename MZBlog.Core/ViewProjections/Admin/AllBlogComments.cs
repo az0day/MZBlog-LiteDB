@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,9 +37,9 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class BlogCommentsViewProjection : IViewProjection<AllBlogCommentsBindingModel, AllBlogCommentsViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public BlogCommentsViewProjection(DB.AutoBox db)
+        public BlogCommentsViewProjection(LiteDatabase db)
         {
             _db = db;
         }
@@ -48,7 +48,9 @@ namespace MZBlog.Core.ViewProjections.Admin
         {
             var skip = (input.Page - 1) * input.Take;
 
-            var comments = _db.Select<BlogComment>("from " + DBTableNames.BlogComments + " order by CreatedTime desc limit " + skip + "," + input.Take + 1)
+            var comments = _db.GetCollection<BlogComment>(DBTableNames.BlogComments)
+                .Find(Query.All(), skip, input.Take + 1)
+                .OrderByDescending(b => b.CreatedTime)
                 .ToList().AsReadOnly();
 
             var pagedComments = comments.Take(input.Take);

@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System;
 using System.Collections.Generic;
@@ -24,16 +24,16 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class IntervalBlogPostsViewProjection : IViewProjection<IntervalBlogPostsBindingModel, IntervalBlogPostsViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public IntervalBlogPostsViewProjection(DB.AutoBox db)
+        public IntervalBlogPostsViewProjection(LiteDatabase db)
         {
             _db = db;
         }
 
         public IntervalBlogPostsViewModel Project(IntervalBlogPostsBindingModel input)
         {
-            var posts = from p in _db.Select<BlogPost>("from " + DBTableNames.BlogPosts)
+            var posts = from p in _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindAll()
                         where p.IsPublished && p.PubDate < input.ToDate && p.PubDate > input.FromDate
                         orderby p.PubDate descending
                         select p;

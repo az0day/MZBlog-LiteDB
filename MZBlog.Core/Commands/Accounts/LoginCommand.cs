@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -31,9 +31,9 @@ namespace MZBlog.Core.Commands.Accounts
 
     public class LoginCommandInvoker : ICommandInvoker<LoginCommand, LoginCommandResult>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public LoginCommandInvoker(DB.AutoBox db)
+        public LoginCommandInvoker(LiteDatabase db)
         {
             _db = db;
         }
@@ -41,9 +41,9 @@ namespace MZBlog.Core.Commands.Accounts
         public LoginCommandResult Execute(LoginCommand loginCommand)
         {
             var hashedPassword = Hasher.GetMd5Hash(loginCommand.Password);
-            if (_db.SelectCount("from " + DBTableNames.Authors) == 0)
+            if (_db.GetCollection<Author>(DBTableNames.Authors).Count() == 0)
             {
-                _db.Insert(DBTableNames.Authors, new Author
+                _db.GetCollection<Author>(DBTableNames.Authors).Insert(new Author
                 {
                     Email = "mz@bl.og",
                     DisplayName = "mzblog",
@@ -51,12 +51,10 @@ namespace MZBlog.Core.Commands.Accounts
                     HashedPassword = Hasher.GetMd5Hash("mzblog")
                 });
             }
-            var author = from u in _db.Select<Author>("from " + DBTableNames.Authors)
-                         where u.Email == loginCommand.Email && u.HashedPassword == hashedPassword
-                         select u;
+            var author = _db.GetCollection<Author>(DBTableNames.Authors).FindOne(x => x.Email == loginCommand.Email && x.HashedPassword == hashedPassword);
 
-            if (author.Count() > 0)
-                return new LoginCommandResult() { Author = author.FirstOrDefault() };
+            if (author != null)
+                return new LoginCommandResult() { Author = author };
 
             return new LoginCommandResult(trrorMessage: "用户名或密码不正确") { };
         }

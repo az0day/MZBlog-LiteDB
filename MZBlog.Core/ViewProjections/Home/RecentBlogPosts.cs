@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System;
 using System.Collections.Generic;
@@ -38,9 +38,9 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class RecentBlogPostViewProjection : IViewProjection<RecentBlogPostsBindingModel, RecentBlogPostsViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public RecentBlogPostViewProjection(DB.AutoBox db)
+        public RecentBlogPostViewProjection(LiteDatabase db)
         {
             _db = db;
         }
@@ -48,12 +48,12 @@ namespace MZBlog.Core.ViewProjections.Home
         public RecentBlogPostsViewModel Project(RecentBlogPostsBindingModel input)
         {
             var skip = (input.Page - 1) * input.Take;
-            var posts = (from p in _db.Select<BlogPost>("from " + DBTableNames.BlogPosts)
+            var posts = (from p in _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindAll()
                          where p.IsPublished
                          orderby p.PubDate descending
                          select p)
                          .Skip(skip)
-                         .Take(input.Take+1)
+                         .Take(input.Take + 1)
                          .ToList()
                          .AsReadOnly();
 

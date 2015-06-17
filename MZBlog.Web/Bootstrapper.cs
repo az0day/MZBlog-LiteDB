@@ -1,5 +1,4 @@
-﻿using iBoxDB.LocalServer;
-using MZBlog.Core;
+﻿using MZBlog.Core;
 using MZBlog.Core.Cache;
 using MZBlog.Core.Documents;
 using MZBlog.Core.Extensions;
@@ -12,6 +11,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using LiteDB;
 
 namespace MZBlog.Web
 {
@@ -27,7 +27,7 @@ namespace MZBlog.Web
 
         private Response ErrorHandler(NancyContext ctx, Exception ex)
         {
-            if (ex is iBoxDB.E.DatabaseShutdownException)
+            if (ex is LiteException)
             {
                 return "DB can't connect.";
             }
@@ -44,7 +44,7 @@ namespace MZBlog.Web
             RegisterIViewProjections(container);
             TagExtension.SetupViewProjectionFactory(container.Resolve<IViewProjectionFactory>());
             RegisterICommandInvoker(container);
-            container.Register<DB.AutoBox>(this.Database);
+            container.Register<LiteDatabase>(this.Database);
             //container.Register(typeof(MongoDatabase), (cContainer, overloads) => Database);
         }
 
@@ -55,28 +55,23 @@ namespace MZBlog.Web
             nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("content"));
         }
 
-        public DB.AutoBox Database
+
+        private LiteDatabase db;
+
+        public LiteDatabase Database
         {
             get
             {
-                var dbPath = Path.Combine(this.RootPathProvider.GetRootPath(), "App_Data", "ibox");
-                if (!Directory.Exists(dbPath))
+                if (db == null)
                 {
-                    Directory.CreateDirectory(dbPath);
+                    var dbPath = Path.Combine(this.RootPathProvider.GetRootPath(), "App_Data", "litedb");
+                    if (!Directory.Exists(dbPath))
+                    {
+                        Directory.CreateDirectory(dbPath);
+                    }
+
+                    db = new LiteDatabase(dbPath + @"\blog.db");
                 }
-
-                var server = new DB(dbPath);
-                var config = server.GetConfig();
-                config.EnsureTable<Author>(DBTableNames.Authors, "Id");
-                //config.EnsureIndex<Author>(DBTableNames.Authors, "Email");
-                config.EnsureTable<BlogPost>(DBTableNames.BlogPosts, "Id");
-                //config.EnsureIndex<BlogPost>(DBTableNames.BlogPosts, "TitleSlug", "Status", "PubDate", "DateUTC");
-                config.EnsureTable<BlogComment>(DBTableNames.BlogComments, "Id");
-                //config.EnsureIndex<BlogComment>(DBTableNames.BlogComments, "PostId");
-                config.EnsureTable<SpamHash>(DBTableNames.SpamHashes, "Id");
-                config.EnsureTable<Tag>(DBTableNames.Tags, "Slug");
-
-                var db = server.Open();
                 return db;
             }
         }

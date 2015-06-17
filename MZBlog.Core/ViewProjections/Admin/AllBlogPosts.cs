@@ -1,4 +1,4 @@
-﻿using iBoxDB.LocalServer;
+﻿using LiteDB;
 using MZBlog.Core.Documents;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,9 +37,9 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class AllBlogPostViewProjection : IViewProjection<AllBlogPostsBindingModel, AllBlogPostsViewModel>
     {
-        private readonly DB.AutoBox _db;
+        private readonly LiteDatabase _db;
 
-        public AllBlogPostViewProjection(DB.AutoBox db)
+        public AllBlogPostViewProjection(LiteDatabase db)
         {
             _db = db;
         }
@@ -48,7 +48,7 @@ namespace MZBlog.Core.ViewProjections.Admin
         {
             var skip = (input.Page - 1) * input.Take;
 
-            var posts = (from p in _db.Select<BlogPost>("from " + DBTableNames.BlogPosts)
+            var posts = (from p in _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).FindAll()
                          orderby p.DateUTC descending
                          select p)
                         .Skip(skip)
