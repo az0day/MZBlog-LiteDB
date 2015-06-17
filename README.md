@@ -6,7 +6,7 @@ MZBlog是[衣明志个人博客](http://yimingzhi.net)的开源版本，基于Na
 
 2015年3月，MZBlog的数据库改为iBoxDB。
 
-因为iBoxDB不开源，本人改为LiteDB。
+因为iBoxDB不开源，本人改为[LiteDB](https://github.com/mbdavid/LiteDB)。
 
 由于我也是第一次接触LiteDB，可能有些用法不正确。请看到的同行不吝赐教。
 
