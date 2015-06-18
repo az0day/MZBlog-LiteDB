@@ -43,7 +43,7 @@ namespace MZBlog.Core.Commands.Accounts
             var hashedPassword = Hasher.GetMd5Hash(loginCommand.Password);
 
             var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-            if (authorCol.Exists(Query.All()))
+            if (!authorCol.Exists(Query.All()))
             {
                 authorCol.Insert(new Author
                 {
