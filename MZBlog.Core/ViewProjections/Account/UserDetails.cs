@@ -5,17 +5,20 @@ namespace MZBlog.Core.ViewProjections.Account
 {
     public class GetUserDetails : IViewProjection<string, Author>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public GetUserDetails(LiteDatabase db)
+        public GetUserDetails(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public Author Project(string input)
         {
-            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-            return authorCol.FindById(input);
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                return authorCol.FindById(input);
+            }
         }
     }
 }

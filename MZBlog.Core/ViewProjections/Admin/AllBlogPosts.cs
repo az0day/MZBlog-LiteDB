@@ -37,34 +37,37 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class AllBlogPostViewProjection : IViewProjection<AllBlogPostsBindingModel, AllBlogPostsViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public AllBlogPostViewProjection(LiteDatabase db)
+        public AllBlogPostViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public AllBlogPostsViewModel Project(AllBlogPostsBindingModel input)
         {
-            var skip = (input.Page - 1) * input.Take;
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var posts = (from p in blogPostCol.FindAll()
-                         orderby p.DateUTC descending
-                         select p)
-                        .Skip(skip)
-                        .Take(input.Take + 1)
-                        .ToList()
-                        .AsReadOnly();
-
-            var pagedPosts = posts.Take(input.Take);
-            var hasNextPage = posts.Count > input.Take;
-
-            return new AllBlogPostsViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                Posts = pagedPosts,
-                Page = input.Page,
-                HasNextPage = hasNextPage
-            };
+                var skip = (input.Page - 1) * input.Take;
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var posts = (from p in blogPostCol.FindAll()
+                             orderby p.DateUTC descending
+                             select p)
+                            .Skip(skip)
+                            .Take(input.Take + 1)
+                            .ToList()
+                            .AsReadOnly();
+
+                var pagedPosts = posts.Take(input.Take);
+                var hasNextPage = posts.Count > input.Take;
+
+                return new AllBlogPostsViewModel
+                {
+                    Posts = pagedPosts,
+                    Page = input.Page,
+                    HasNextPage = hasNextPage
+                };
+            }
         }
     }
 }

@@ -18,31 +18,34 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class BlogPostDetailsViewProjection : IViewProjection<BlogPostDetailsBindingModel, BlogPostDetailsViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public BlogPostDetailsViewProjection(LiteDatabase db)
+        public BlogPostDetailsViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public BlogPostDetailsViewModel Project(BlogPostDetailsBindingModel input)
         {
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var post = blogPostCol.FindOne(x => x.TitleSlug == input.Permalink);
-            if (post == null)
-                return null;
-            post.ViewCount++;
-            blogPostCol.Update(post);
-            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
-            var comments = blogCommentCol.Find(x => x.PostId == post.Id)
-                                    .OrderBy(o => o.CreatedTime)
-                                    .ToArray();
-
-            return new BlogPostDetailsViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                BlogPost = post,
-                Comments = comments
-            };
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var post = blogPostCol.FindOne(x => x.TitleSlug == input.Permalink);
+                if (post == null)
+                    return null;
+                post.ViewCount++;
+                blogPostCol.Update(post);
+                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                var comments = blogCommentCol.Find(x => x.PostId == post.Id)
+                                        .OrderBy(o => o.CreatedTime)
+                                        .ToArray();
+
+                return new BlogPostDetailsViewModel
+                {
+                    BlogPost = post,
+                    Comments = comments
+                };
+            }
         }
     }
 }

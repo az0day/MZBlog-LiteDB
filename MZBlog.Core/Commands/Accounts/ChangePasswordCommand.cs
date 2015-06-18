@@ -16,25 +16,28 @@ namespace MZBlog.Core.Commands.Accounts
 
     public class ChangePasswordCommandInvoker : ICommandInvoker<ChangePasswordCommand, CommandResult>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public ChangePasswordCommandInvoker(LiteDatabase db)
+        public ChangePasswordCommandInvoker(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public CommandResult Execute(ChangePasswordCommand command)
         {
-            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-            var author = authorCol.FindById(command.AuthorId);
-            if (Hasher.GetMd5Hash(command.OldPassword) != author.HashedPassword)
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                return new CommandResult("旧密码不正确!");
-            }
+                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var author = authorCol.FindById(command.AuthorId);
+                if (Hasher.GetMd5Hash(command.OldPassword) != author.HashedPassword)
+                {
+                    return new CommandResult("旧密码不正确!");
+                }
 
-            author.HashedPassword = Hasher.GetMd5Hash(command.NewPassword);
-            authorCol.Update(author);
-            return CommandResult.SuccessResult;
+                author.HashedPassword = Hasher.GetMd5Hash(command.NewPassword);
+                authorCol.Update(author);
+                return CommandResult.SuccessResult;
+            }
         }
     }
 }

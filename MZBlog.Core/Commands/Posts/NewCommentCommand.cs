@@ -36,12 +36,12 @@ namespace MZBlog.Core.Commands.Posts
 
     public class NewCommentCommandInvoker : ICommandInvoker<NewCommentCommand, CommandResult>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
         private readonly ISpamShieldService _spamShield;
 
-        public NewCommentCommandInvoker(LiteDatabase db, ISpamShieldService spamShield)
+        public NewCommentCommandInvoker(Config dbConfig, ISpamShieldService spamShield)
         {
-            _db = db;
+            _dbConfig = dbConfig;
             _spamShield = spamShield;
         }
 
@@ -63,10 +63,13 @@ namespace MZBlog.Core.Commands.Posts
                 SiteUrl = command.SiteUrl,
                 CreatedTime = DateTime.UtcNow
             };
-            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
-            var result = blogCommentCol.Insert(comment);
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                var result = blogCommentCol.Insert(comment);
 
-            return CommandResult.SuccessResult;
+                return CommandResult.SuccessResult;
+            }
         }
     }
 }

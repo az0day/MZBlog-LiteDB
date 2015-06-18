@@ -31,34 +31,36 @@ namespace MZBlog.Core.Commands.Accounts
 
     public class LoginCommandInvoker : ICommandInvoker<LoginCommand, LoginCommandResult>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public LoginCommandInvoker(LiteDatabase db)
+        public LoginCommandInvoker(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public LoginCommandResult Execute(LoginCommand loginCommand)
         {
             var hashedPassword = Hasher.GetMd5Hash(loginCommand.Password);
-
-            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-            if (!authorCol.Exists(Query.All()))
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                authorCol.Insert(new Author
+                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                if (!authorCol.Exists(Query.All()))
                 {
-                    Email = "mz@bl.og",
-                    DisplayName = "mzblog",
-                    Roles = new[] { "admin" },
-                    HashedPassword = Hasher.GetMd5Hash("mzblog")
-                });
+                    authorCol.Insert(new Author
+                    {
+                        Email = "mz@bl.og",
+                        DisplayName = "mzblog",
+                        Roles = new[] { "admin" },
+                        HashedPassword = Hasher.GetMd5Hash("mzblog")
+                    });
+                }
+                var author = authorCol.FindOne(x => x.Email == loginCommand.Email && x.HashedPassword == hashedPassword);
+
+                if (author != null)
+                    return new LoginCommandResult() { Author = author };
+
+                return new LoginCommandResult(trrorMessage: "用户名或密码不正确") { };
             }
-            var author = authorCol.FindOne(x => x.Email == loginCommand.Email && x.HashedPassword == hashedPassword);
-
-            if (author != null)
-                return new LoginCommandResult() { Author = author };
-
-            return new LoginCommandResult(trrorMessage: "用户名或密码不正确") { };
         }
     }
 }

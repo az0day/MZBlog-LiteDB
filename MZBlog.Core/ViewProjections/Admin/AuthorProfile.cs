@@ -12,24 +12,27 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class AuthorProfileViewProjection : IViewProjection<string, AuthorProfileViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public AuthorProfileViewProjection(LiteDatabase db)
+        public AuthorProfileViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public AuthorProfileViewModel Project(string input)
         {
-            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-            var author = authorCol.FindById(input);
-            if (author == null)
-                return null;
-            return new AuthorProfileViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                DisplayName = author.DisplayName,
-                Email = author.Email
-            };
+                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var author = authorCol.FindById(input);
+                if (author == null)
+                    return null;
+                return new AuthorProfileViewModel
+                {
+                    DisplayName = author.DisplayName,
+                    Email = author.Email
+                };
+            }
         }
     }
 }

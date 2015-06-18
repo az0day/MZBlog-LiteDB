@@ -15,18 +15,21 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class BlogPostEditViewProjection : IViewProjection<BlogPostEditBindingModel, BlogPostEditViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public BlogPostEditViewProjection(LiteDatabase db)
+        public BlogPostEditViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public BlogPostEditViewModel Project(BlogPostEditBindingModel input)
         {
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var post = blogPostCol.FindById(input.PostId);
-            return new BlogPostEditViewModel { BlogPost = post };
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var post = blogPostCol.FindById(input.PostId);
+                return new BlogPostEditViewModel { BlogPost = post };
+            }
         }
     }
 }

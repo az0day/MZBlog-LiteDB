@@ -24,29 +24,32 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class AllStatisticsViewProjection : IViewProjection<AllStatisticsBindingModel, AllStatisticsViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public AllStatisticsViewProjection(LiteDatabase db)
+        public AllStatisticsViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public AllStatisticsViewModel Project(AllStatisticsBindingModel input)
         {
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var postCount = blogPostCol.Count();
-            if (postCount == 0)
-                return new AllStatisticsViewModel();
-            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
-            var stat = new AllStatisticsViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                PostsCount = postCount,
-                CommentsCount = blogCommentCol.Count()
-            };
-            var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
-            stat.TagsCount = tagCol.Count();
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var postCount = blogPostCol.Count();
+                if (postCount == 0)
+                    return new AllStatisticsViewModel();
+                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                var stat = new AllStatisticsViewModel
+                {
+                    PostsCount = postCount,
+                    CommentsCount = blogCommentCol.Count()
+                };
+                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
+                stat.TagsCount = tagCol.Count();
 
-            return stat;
+                return stat;
+            }
         }
     }
 }

@@ -38,35 +38,38 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class RecentBlogPostViewProjection : IViewProjection<RecentBlogPostsBindingModel, RecentBlogPostsViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public RecentBlogPostViewProjection(LiteDatabase db)
+        public RecentBlogPostViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public RecentBlogPostsViewModel Project(RecentBlogPostsBindingModel input)
         {
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var skip = (input.Page - 1) * input.Take;
-            var posts = (from p in blogPostCol.FindAll()
-                         where p.IsPublished
-                         orderby p.PubDate descending
-                         select p)
-                         .Skip(skip)
-                         .Take(input.Take + 1)
-                         .ToList()
-                         .AsReadOnly();
-
-            var pagedPosts = posts.Take(input.Take).ToList();
-            var hasNextPage = posts.Count > input.Take;
-
-            return new RecentBlogPostsViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                Posts = pagedPosts,
-                Page = input.Page,
-                HasNextPage = hasNextPage
-            };
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var skip = (input.Page - 1) * input.Take;
+                var posts = (from p in blogPostCol.FindAll()
+                             where p.IsPublished
+                             orderby p.PubDate descending
+                             select p)
+                             .Skip(skip)
+                             .Take(input.Take + 1)
+                             .ToList()
+                             .AsReadOnly();
+
+                var pagedPosts = posts.Take(input.Take).ToList();
+                var hasNextPage = posts.Count > input.Take;
+
+                return new RecentBlogPostsViewModel
+                {
+                    Posts = pagedPosts,
+                    Page = input.Page,
+                    HasNextPage = hasNextPage
+                };
+            }
         }
     }
 }

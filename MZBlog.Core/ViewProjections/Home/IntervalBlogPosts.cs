@@ -24,27 +24,30 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class IntervalBlogPostsViewProjection : IViewProjection<IntervalBlogPostsBindingModel, IntervalBlogPostsViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public IntervalBlogPostsViewProjection(LiteDatabase db)
+        public IntervalBlogPostsViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public IntervalBlogPostsViewModel Project(IntervalBlogPostsBindingModel input)
         {
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var posts = from p in blogPostCol.FindAll()
-                        where p.IsPublished && p.PubDate < input.ToDate && p.PubDate > input.FromDate
-                        orderby p.PubDate descending
-                        select p;
-
-            return new IntervalBlogPostsViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                Posts = posts,
-                FromDate = input.FromDate,
-                ToDate = input.ToDate
-            };
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var posts = from p in blogPostCol.FindAll()
+                            where p.IsPublished && p.PubDate < input.ToDate && p.PubDate > input.FromDate
+                            orderby p.PubDate descending
+                            select p;
+
+                return new IntervalBlogPostsViewModel
+                {
+                    Posts = posts,
+                    FromDate = input.FromDate,
+                    ToDate = input.ToDate
+                };
+            }
         }
     }
 }

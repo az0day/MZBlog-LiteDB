@@ -69,6 +69,9 @@
     <Compile Include="Commands\Posts\NewCommentCommand.cs" />
     <Compile Include="Commands\Posts\NewPostCommand.cs" />
     <Compile Include="Commands\Posts\EditPostCommand.cs" />
+    <Compile Include="Config.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DBTableNames.cs" />
     <Compile Include="Documents\Author.cs" />
     <Compile Include="Documents\BlogComment.cs" />

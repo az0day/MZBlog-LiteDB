@@ -26,11 +26,11 @@ namespace MZBlog.Core.Commands.Posts
 
     public class NewPostCommandInvoker : ICommandInvoker<NewPostCommand, CommandResult>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public NewPostCommandInvoker(LiteDatabase db)
+        public NewPostCommandInvoker(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public CommandResult Execute(NewPostCommand command)
@@ -50,38 +50,41 @@ namespace MZBlog.Core.Commands.Posts
                                TitleSlug = command.TitleSlug.IsNullOrWhitespace() ? command.Title.Trim().ToSlug() : command.TitleSlug.Trim().ToSlug(),
                                DateUTC = DateTime.UtcNow
                            };
-            if (!command.Tags.IsNullOrWhitespace())
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var tags = command.Tags.Trim().Split(',').Select(s => s.Trim());
-                post.Tags = tags.Select(s => s.ToSlug()).ToArray();
-                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
-                foreach (var tag in tags)
+                if (!command.Tags.IsNullOrWhitespace())
                 {
-                    var slug = tag.ToSlug();
-                    var tagEntry = tagCol.FindById(slug);
-                    if (tagEntry == null)
+                    var tags = command.Tags.Trim().Split(',').Select(s => s.Trim());
+                    post.Tags = tags.Select(s => s.ToSlug()).ToArray();
+                    var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
+                    foreach (var tag in tags)
                     {
-                        tagEntry = new Tag
+                        var slug = tag.ToSlug();
+                        var tagEntry = tagCol.FindById(slug);
+                        if (tagEntry == null)
                         {
-                            Slug = slug,
-                            Name = tag,
-                            PostCount = 1
-                        };
-                        tagCol.Insert(tagEntry);
-                    }
-                    else
-                    {
-                        tagEntry.PostCount++;
-                        tagCol.Update(tagEntry);
+                            tagEntry = new Tag
+                            {
+                                Slug = slug,
+                                Name = tag,
+                                PostCount = 1
+                            };
+                            tagCol.Insert(tagEntry);
+                        }
+                        else
+                        {
+                            tagEntry.PostCount++;
+                            tagCol.Update(tagEntry);
+                        }
                     }
                 }
-            }
-            else
-                post.Tags = new string[] { };
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var result = blogPostCol.Insert(post);
+                else
+                    post.Tags = new string[] { };
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var result = blogPostCol.Insert(post);
 
-            return CommandResult.SuccessResult;
+                return CommandResult.SuccessResult;
+            }
         }
     }
 }

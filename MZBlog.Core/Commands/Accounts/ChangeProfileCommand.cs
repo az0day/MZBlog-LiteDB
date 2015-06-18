@@ -14,24 +14,27 @@ namespace MZBlog.Core.Commands.Accounts
 
     public class ChangeProfileCommandInvoker : ICommandInvoker<ChangeProfileCommand, CommandResult>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public ChangeProfileCommandInvoker(LiteDatabase db)
+        public ChangeProfileCommandInvoker(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public CommandResult Execute(ChangeProfileCommand command)
         {
-            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-            var author = authorCol.FindById(command.AuthorId);
-            if (author == null)
-                return new CommandResult("用户信息不存在");
-            author.DisplayName = command.NewDisplayName;
-            author.Email = command.NewEmail;
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var author = authorCol.FindById(command.AuthorId);
+                if (author == null)
+                    return new CommandResult("用户信息不存在");
+                author.DisplayName = command.NewDisplayName;
+                author.Email = command.NewEmail;
 
-            authorCol.Update(author);
-            return CommandResult.SuccessResult;
+                authorCol.Update(author);
+                return CommandResult.SuccessResult;
+            }
         }
     }
 }

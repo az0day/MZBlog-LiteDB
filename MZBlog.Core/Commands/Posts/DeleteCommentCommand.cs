@@ -10,18 +10,21 @@ namespace MZBlog.Core.Commands.Posts
 
     public class DeleteCommentCommandInvoker : ICommandInvoker<DeleteCommentCommand, CommandResult>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public DeleteCommentCommandInvoker(LiteDatabase db)
+        public DeleteCommentCommandInvoker(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public CommandResult Execute(DeleteCommentCommand command)
         {
-            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
-            blogCommentCol.Delete(command.CommentId);
-            return CommandResult.SuccessResult;
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                blogCommentCol.Delete(command.CommentId);
+                return CommandResult.SuccessResult;
+            }
         }
     }
 }

@@ -24,30 +24,33 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class RecentBlogPostSummaryViewProjection : IViewProjection<RecentBlogPostSummaryBindingModel, RecentBlogPostSummaryViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public RecentBlogPostSummaryViewProjection(LiteDatabase db)
+        public RecentBlogPostSummaryViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public RecentBlogPostSummaryViewModel Project(RecentBlogPostSummaryBindingModel input)
         {
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var titles = (from p in blogPostCol.FindAll()
-                          where p.IsPublished
-                          orderby p.PubDate descending
-                          select new BlogPostSummary
-                          {
-                              Title = p.Title,
-                              Link = p.GetLink()
-                          }
-                          )
-                .Take(input.Page)
-                .ToList()
-                .AsReadOnly();
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var titles = (from p in blogPostCol.FindAll()
+                              where p.IsPublished
+                              orderby p.PubDate descending
+                              select new BlogPostSummary
+                              {
+                                  Title = p.Title,
+                                  Link = p.GetLink()
+                              }
+                              )
+                    .Take(input.Page)
+                    .ToList()
+                    .AsReadOnly();
 
-            return new RecentBlogPostSummaryViewModel { BlogPostsSummaries = titles };
+                return new RecentBlogPostSummaryViewModel { BlogPostsSummaries = titles };
+            }
         }
     }
 }

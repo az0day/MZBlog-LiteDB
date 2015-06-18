@@ -3,6 +3,7 @@ using MZBlog.Core.Documents;
 using MZBlog.Core.Extensions;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 
 namespace MZBlog.Core
 {
@@ -26,25 +27,35 @@ namespace MZBlog.Core
 
     public class SpamShieldService : ISpamShieldService
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public SpamShieldService(LiteDatabase db)
+        public SpamShieldService(Config dbConfig)
         {
-            _db = db;
+            //var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data", "litedb");
+            //if (!Directory.Exists(dbPath))
+            //{
+            //    Directory.CreateDirectory(dbPath);
+            //}
+
+            //dbConfig = Path.Combine(dbPath, "blog.db");
+            _dbConfig = dbConfig;
         }
 
         public string CreateTick(string key)
         {
-            var tick = ObjectId.NewObjectId().ToString();
-            var spamHash = new SpamHash
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                Id = tick,
-                PostKey = key,
-                CreatedTime = DateTime.UtcNow
-            };
-            var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
-            spamHashCol.Insert(spamHash);
-            return tick;
+                var tick = ObjectId.NewObjectId().ToString();
+                var spamHash = new SpamHash
+                {
+                    Id = tick,
+                    PostKey = key,
+                    CreatedTime = DateTime.UtcNow
+                };
+                var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+                spamHashCol.Insert(spamHash);
+                return tick;
+            }
         }
 
         public string GenerateHash(string tick)
@@ -53,32 +64,38 @@ namespace MZBlog.Core
             if (tick.IsNullOrWhitespace())
                 return nonhash;
 
-            var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
-            var spamHash = spamHashCol.FindOne(x => x.PostKey == tick);
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+                var spamHash = spamHashCol.FindOne(x => x.PostKey == tick);
 
-            if (spamHash == null || spamHash.Pass || !spamHash.Hash.IsNullOrWhitespace())
-                return nonhash;
+                if (spamHash == null || spamHash.Pass || !spamHash.Hash.IsNullOrWhitespace())
+                    return nonhash;
 
-            spamHash.Hash = new Random().NextDouble().ToString();
-            spamHashCol.Update(spamHash);
+                spamHash.Hash = new Random().NextDouble().ToString();
+                spamHashCol.Update(spamHash);
 
-            return spamHash.Hash;
+                return spamHash.Hash;
+            }
         }
 
         public bool IsSpam(SpamShield command)
         {
-            if (command.Tick.IsNullOrWhitespace() || command.Hash.IsNullOrWhitespace())
-                return true;
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                if (command.Tick.IsNullOrWhitespace() || command.Hash.IsNullOrWhitespace())
+                    return true;
 
-            var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
-            var spamHash = spamHashCol.FindOne(x => x.PostKey == command.Tick);
+                var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+                var spamHash = spamHashCol.FindOne(x => x.PostKey == command.Tick);
 
-            if (spamHash == null || spamHash.Pass || spamHash.Hash != command.Hash)
-                return true;
+                if (spamHash == null || spamHash.Pass || spamHash.Hash != command.Hash)
+                    return true;
 
-            spamHash.Pass = true;
-            spamHashCol.Update(spamHash);
-            return false;
+                spamHash.Pass = true;
+                spamHashCol.Update(spamHash);
+                return false;
+            }
         }
     }
 }

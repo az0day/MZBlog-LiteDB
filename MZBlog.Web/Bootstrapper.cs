@@ -1,4 +1,5 @@
-﻿using MZBlog.Core;
+﻿using LiteDB;
+using MZBlog.Core;
 using MZBlog.Core.Cache;
 using MZBlog.Core.Documents;
 using MZBlog.Core.Extensions;
@@ -11,7 +12,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using LiteDB;
 
 namespace MZBlog.Web
 {
@@ -44,7 +44,7 @@ namespace MZBlog.Web
             RegisterIViewProjections(container);
             TagExtension.SetupViewProjectionFactory(container.Resolve<IViewProjectionFactory>());
             RegisterICommandInvoker(container);
-            container.Register<LiteDatabase>(this.Database);
+            container.Register<Config>(this.Config);
             //container.Register(typeof(MongoDatabase), (cContainer, overloads) => Database);
         }
 
@@ -55,24 +55,23 @@ namespace MZBlog.Web
             nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("content"));
         }
 
+        private Config _config;
 
-        private LiteDatabase db;
-
-        public LiteDatabase Database
+        public Config Config
         {
             get
             {
-                if (db == null)
+                if (_config == null)
                 {
-                    var dbPath = Path.Combine(this.RootPathProvider.GetRootPath(), "App_Data", "litedb");
-                    if (!Directory.Exists(dbPath))
+                    string dbDir = Path.Combine(this.RootPathProvider.GetRootPath(), "App_Data", "litedb");
+                    if (!Directory.Exists(dbDir))
                     {
-                        Directory.CreateDirectory(dbPath);
+                        Directory.CreateDirectory(dbDir);
                     }
 
-                    db = new LiteDatabase(dbPath + @"\blog.db");
+                    _config = new Config { DbPath = Path.Combine(dbDir, "blog.db") };
                 }
-                return db;
+                return _config;
             }
         }
 

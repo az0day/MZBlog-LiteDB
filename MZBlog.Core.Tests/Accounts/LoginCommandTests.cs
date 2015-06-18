@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using LiteDB;
 using MZBlog.Core.Commands.Accounts;
 using MZBlog.Core.Documents;
 using Xunit;
@@ -10,14 +11,16 @@ namespace MZBlog.Core.Tests.Accounts
         [Fact]
         public void login_should_success_if_user_in_database()
         {
-            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-            authorCol.Insert(new Author()
-                    {
-                        Email = "test@mz.yi",
-                        HashedPassword = Hasher.GetMd5Hash("test")
-                    });
-
-            var loginCommandInvoker = new LoginCommandInvoker(_db);
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                authorCol.Insert(new Author()
+                        {
+                            Email = "test@mz.yi",
+                            HashedPassword = Hasher.GetMd5Hash("test")
+                        });
+            }
+            var loginCommandInvoker = new LoginCommandInvoker(_dbConfig);
 
             loginCommandInvoker.Execute(new LoginCommand
             {
@@ -34,10 +37,12 @@ namespace MZBlog.Core.Tests.Accounts
                 Email = "username@mz.yi",
                 HashedPassword = Hasher.GetMd5Hash("psw1")
             };
-            var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-            authorCol.Insert(documtnt);
-
-            var loginCommandInvoker = new LoginCommandInvoker(_db);
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                authorCol.Insert(documtnt);
+            }
+            var loginCommandInvoker = new LoginCommandInvoker(_dbConfig);
 
             loginCommandInvoker.Execute(new LoginCommand()
             {

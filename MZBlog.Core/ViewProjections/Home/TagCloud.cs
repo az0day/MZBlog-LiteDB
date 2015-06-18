@@ -25,23 +25,26 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class TagCloudViewProjection : IViewProjection<TagCloudBindingModel, TagCloudViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public TagCloudViewProjection(LiteDatabase db)
+        public TagCloudViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public TagCloudViewModel Project(TagCloudBindingModel input)
         {
-            var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
-            var result = new Dictionary<Tag, int>();
-            var tags = tagCol.FindAll().OrderByDescending(x => x.PostCount);
-
-            return new TagCloudViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                Tags = tags
-            };
+                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
+                var result = new Dictionary<Tag, int>();
+                var tags = tagCol.FindAll().OrderByDescending(x => x.PostCount);
+
+                return new TagCloudViewModel
+                {
+                    Tags = tags
+                };
+            }
         }
     }
 }

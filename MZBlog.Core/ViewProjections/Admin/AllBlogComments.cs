@@ -37,31 +37,34 @@ namespace MZBlog.Core.ViewProjections.Admin
 
     public class BlogCommentsViewProjection : IViewProjection<AllBlogCommentsBindingModel, AllBlogCommentsViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public BlogCommentsViewProjection(LiteDatabase db)
+        public BlogCommentsViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public AllBlogCommentsViewModel Project(AllBlogCommentsBindingModel input)
         {
-            var skip = (input.Page - 1) * input.Take;
-            var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
-            var comments = blogCommentCol
-                .Find(Query.All(), skip, input.Take + 1)
-                .OrderByDescending(b => b.CreatedTime)
-                .ToList().AsReadOnly();
-
-            var pagedComments = comments.Take(input.Take);
-            var hasNextPage = comments.Count > input.Take;
-
-            return new AllBlogCommentsViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                Comments = pagedComments,
-                Page = input.Page,
-                HasNextPage = hasNextPage
-            };
+                var skip = (input.Page - 1) * input.Take;
+                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                var comments = blogCommentCol
+                    .Find(Query.All(), skip, input.Take + 1)
+                    .OrderByDescending(b => b.CreatedTime)
+                    .ToList().AsReadOnly();
+
+                var pagedComments = comments.Take(input.Take);
+                var hasNextPage = comments.Count > input.Take;
+
+                return new AllBlogCommentsViewModel
+                {
+                    Comments = pagedComments,
+                    Page = input.Page,
+                    HasNextPage = hasNextPage
+                };
+            }
         }
     }
 }

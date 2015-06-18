@@ -19,30 +19,33 @@ namespace MZBlog.Core.ViewProjections.Home
 
     public class TaggedBlogPostsViewProjection : IViewProjection<TaggedBlogPostsBindingModel, TaggedBlogPostsViewModel>
     {
-        private readonly LiteDatabase _db;
+        private readonly Config _dbConfig;
 
-        public TaggedBlogPostsViewProjection(LiteDatabase db)
+        public TaggedBlogPostsViewProjection(Config dbConfig)
         {
-            _db = db;
+            _dbConfig = dbConfig;
         }
 
         public TaggedBlogPostsViewModel Project(TaggedBlogPostsBindingModel input)
         {
-            var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-            var posts = (from p in blogPostCol.FindAll()
-                         where p.IsPublished && p.Tags.Contains(input.Tag)
-                         orderby p.PubDate descending
-                         select p)
-                     .ToList();
-            if (posts.Count == 0)
-                return null;
-            var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
-            var tagName = tagCol.FindOne(x => x.Slug == input.Tag).Name;
-            return new TaggedBlogPostsViewModel
+            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                Posts = posts,
-                Tag = tagName
-            };
+                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var posts = (from p in blogPostCol.FindAll()
+                             where p.IsPublished && p.Tags.Contains(input.Tag)
+                             orderby p.PubDate descending
+                             select p)
+                         .ToList();
+                if (posts.Count == 0)
+                    return null;
+                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
+                var tagName = tagCol.FindOne(x => x.Slug == input.Tag).Name;
+                return new TaggedBlogPostsViewModel
+                {
+                    Posts = posts,
+                    Tag = tagName
+                };
+            }
         }
     }
 }
