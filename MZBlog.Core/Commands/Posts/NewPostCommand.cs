@@ -2,7 +2,6 @@
 using MZBlog.Core.Documents;
 using MZBlog.Core.Extensions;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace MZBlog.Core.Commands.Posts

@@ -1,6 +1,5 @@
 ﻿using LiteDB;
 using MZBlog.Core.Documents;
-using System.Linq;
 
 namespace MZBlog.Core.Commands.Posts
 {
