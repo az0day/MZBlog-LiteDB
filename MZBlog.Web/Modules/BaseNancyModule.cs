@@ -19,12 +19,14 @@ namespace MZBlog.Web.Modules
         {
             ViewBag.Settings = AppConfiguration.Current;
             Settings = AppConfiguration.Current;
+
             return null;
         }
 
         private Response SetEmptyMessageCollection(NancyContext arg)
         {
             ViewBag.Messages = new List<ExpandoObject>();
+            //ViewBag.TagCould = new List<ExpandoObject>();
 
             return null;
         }

@@ -63,7 +63,14 @@ namespace MZBlog.Web.Modules
                 newCommentCommand.PostId = postModel.BlogPost.Id;
                 var result = _commandInvokerFactory.Handle<NewCommentCommand, CommandResult>(newCommentCommand);
                 if (result.Success)
-                    return Response.AsRedirect(string.Format("{0}#comment_{1}", postModel.BlogPost.GetLink(), newCommentCommand.Id));
+                {
+                    var url = string.Format(
+                        "{0}#comment_{1}", 
+                        postModel.BlogPost.GetLink(), 
+                        newCommentCommand.Id
+                    );
+                    return Response.AsRedirect(url);
+                }
             }
             return HttpStatusCode.NotFound;
         }

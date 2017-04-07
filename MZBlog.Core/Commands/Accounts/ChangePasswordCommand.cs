@@ -25,9 +25,9 @@ namespace MZBlog.Core.Commands.Accounts
 
         public CommandResult Execute(ChangePasswordCommand command)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var authorCol = db.GetCollection<Author>(DBTableNames.Authors);
                 var author = authorCol.FindById(command.AuthorId);
                 if (Hasher.GetMd5Hash(command.OldPassword) != author.HashedPassword)
                 {

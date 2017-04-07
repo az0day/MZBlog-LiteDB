@@ -30,8 +30,8 @@ namespace MZBlog.Web.Modules
             Post["/mz-admin/posts/edit/{postid}"] = _ => EditPost(this.Bind<EditPostCommand>());
             Get["/mz-admin/posts/delete/{postid}"] = _ => DeletePost(this.Bind<DeletePostCommand>());
 
-            Get["/mz-admin/comment/{page?1}"] = _ => ShowComments(_.page);
-            Get["/mz-admin/comment/delete/{commentid}"] = _ => DeleteComment(this.Bind<DeleteCommentCommand>());
+            Get["/mz-admin/comments/{page?1}"] = _ => ShowComments(_.page);
+            Get["/mz-admin/comments/delete/{commentid}"] = _ => DeleteComment(this.Bind<DeleteCommentCommand>());
             Get["/mz-admin/tags"] = _ => ShowTags();
             Post["/mz-admin/slug"] = _ => GetSlug();
         }
@@ -45,6 +45,7 @@ namespace MZBlog.Web.Modules
         private dynamic ShowTags()
         {
             var tags = _viewProjectionFactory.Get<TagCloudBindingModel, TagCloudViewModel>(new TagCloudBindingModel() { Threshold = 1 });
+
             return View["Tags", tags];
         }
 

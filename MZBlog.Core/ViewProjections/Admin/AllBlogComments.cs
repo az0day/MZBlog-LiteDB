@@ -46,10 +46,10 @@ namespace MZBlog.Core.ViewProjections.Admin
 
         public AllBlogCommentsViewModel Project(AllBlogCommentsBindingModel input)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
                 var skip = (input.Page - 1) * input.Take;
-                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                var blogCommentCol = db.GetCollection<BlogComment>(DBTableNames.BlogComments);
                 var comments = blogCommentCol
                     .Find(Query.All(), skip, input.Take + 1)
                     .OrderByDescending(b => b.CreatedTime)

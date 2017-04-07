@@ -133,14 +133,14 @@ namespace MZBlog.Core
 
     internal static class ObjectIdGenerator
     {
-        private static readonly DateTime Epoch =
+        private static readonly DateTime epoch =
           new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        private static readonly object _innerLock = new object();
-        private static int _counter;
-        private static readonly byte[] _machineHash = GenerateHostHash();
+        private static readonly object innerLock = new object();
+        private static int counter;
+        private static readonly byte[] machineHash = GenerateHostHash();
 
-        private static readonly byte[] _processId =
+        private static readonly byte[] processId =
           BitConverter.GetBytes(GenerateProcessId());
 
         public static byte[] Generate()
@@ -151,10 +151,10 @@ namespace MZBlog.Core
             Array.Copy(BitConverter.GetBytes(GenerateTime()), 0, oid, copyidx, 4);
             copyidx += 4;
 
-            Array.Copy(_machineHash, 0, oid, copyidx, 3);
+            Array.Copy(machineHash, 0, oid, copyidx, 3);
             copyidx += 3;
 
-            Array.Copy(_processId, 0, oid, copyidx, 2);
+            Array.Copy(processId, 0, oid, copyidx, 2);
             copyidx += 2;
 
             Array.Copy(BitConverter.GetBytes(GenerateCounter()), 0, oid, copyidx, 3);
@@ -165,9 +165,9 @@ namespace MZBlog.Core
         private static int GenerateTime()
         {
             var now = DateTime.UtcNow;
-            var nowtime = new DateTime(Epoch.Year, Epoch.Month, Epoch.Day,
+            var nowtime = new DateTime(epoch.Year, epoch.Month, epoch.Day,
               now.Hour, now.Minute, now.Second, now.Millisecond);
-            var diff = nowtime - Epoch;
+            var diff = nowtime - epoch;
             return Convert.ToInt32(Math.Floor(diff.TotalMilliseconds));
         }
 
@@ -188,9 +188,9 @@ namespace MZBlog.Core
 
         private static int GenerateCounter()
         {
-            lock (_innerLock)
+            lock (innerLock)
             {
-                return _counter++;
+                return counter++;
             }
         }
     }

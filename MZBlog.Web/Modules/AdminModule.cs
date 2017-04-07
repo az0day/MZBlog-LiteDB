@@ -9,13 +9,10 @@ namespace MZBlog.Web.Modules
     public class AdminModule : SecureModule
     {
         private readonly ICommandInvokerFactory _commandInvokerFactory;
-        private readonly IRootPathProvider _rootPath;
-
-        public AdminModule(ICommandInvokerFactory commandInvokerFactory, IViewProjectionFactory viewProjectionFactory, IRootPathProvider rootPath)
+        public AdminModule(ICommandInvokerFactory commandInvokerFactory, IViewProjectionFactory viewProjectionFactory)
             : base(viewProjectionFactory)
         {
             _commandInvokerFactory = commandInvokerFactory;
-            _rootPath = rootPath;
 
             Get["/mz-admin"] = _ => Index();
             Get["/mz-admin/change-password"] = _ => ChangePassword();

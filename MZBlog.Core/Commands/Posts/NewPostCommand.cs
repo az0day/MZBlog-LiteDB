@@ -1,4 +1,7 @@
-﻿using LiteDB;
+﻿using System.Text;
+using Kiwi.Markdown;
+using Kiwi.Markdown.ContentProviders;
+using LiteDB;
 using MZBlog.Core.Documents;
 using MZBlog.Core.Extensions;
 using System;
@@ -34,53 +37,71 @@ namespace MZBlog.Core.Commands.Posts
 
         public CommandResult Execute(NewPostCommand command)
         {
-            var markdown = new MarkdownSharp.Markdown();
             //TODO:应该验证TitleSlug是否唯一
+            var contentProvider = new FileContentProvider(null, Encoding.UTF8);
+            var parser = new MarkdownService(contentProvider);
+            var content = parser.ToHtml(command.MarkDown);
+
             var post = new BlogPost
-                           {
-                               Id = ObjectId.NewObjectId(),
-                               AuthorEmail = command.Author.Email,
-                               AuthorDisplayName = command.Author.DisplayName,
-                               MarkDown = command.MarkDown,
-                               Content = markdown.Transform(command.MarkDown),
-                               PubDate = command.PubDate.CloneToUtc(),
-                               Status = command.Published ? PublishStatus.Published : PublishStatus.Draft,
-                               Title = command.Title,
-                               TitleSlug = command.TitleSlug.IsNullOrWhitespace() ? command.Title.Trim().ToSlug() : command.TitleSlug.Trim().ToSlug(),
-                               DateUTC = DateTime.UtcNow
-                           };
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                Id = ObjectId.NewObjectId(),
+                AuthorEmail = command.Author.Email,
+                AuthorDisplayName = command.Author.DisplayName,
+                MarkDown = command.MarkDown,
+                Content = content,
+                PubDate = command.PubDate.CloneToUtc(),
+                Status = command.Published ? PublishStatus.Published : PublishStatus.Draft,
+                Title = command.Title,
+                TitleSlug = command.TitleSlug.IsNullOrWhitespace() ? command.Title.Trim().ToSlug() : command.TitleSlug.Trim().ToSlug(),
+                DateUTC = DateTime.UtcNow
+            };
+
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
                 if (!command.Tags.IsNullOrWhitespace())
                 {
-                    var tags = command.Tags.Trim().Split(',').Select(s => s.Trim());
-                    post.Tags = tags.Select(s => s.ToSlug()).ToArray();
-                    var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
-                    foreach (var tag in tags)
+                    var tags = command.Tags.AsTags();
+                    post.Tags = tags.Keys.ToArray();
+
+                    var tagCol = db.GetCollection<Tag>(DBTableNames.Tags);
+                    foreach (var kv in tags)
                     {
-                        var slug = tag.ToSlug();
-                        var tagEntry = tagCol.FindById(slug);
-                        if (tagEntry == null)
+                        var slug = kv.Key;
+                        var tag = kv.Value;
+
+                        if (string.IsNullOrWhiteSpace(tag))
                         {
-                            tagEntry = new Tag
+                            continue;
+                        }
+
+                        var entry = tagCol.FindOne(t => t.Slug.Equals(slug));
+                        if (entry != null)
+                        {
+                            entry.PostCount++;
+                            tagCol.Update(entry);
+                        }
+                        else
+                        {
+                            entry = new Tag
                             {
+                                Id = ObjectId.NewObjectId(),
                                 Slug = slug,
                                 Name = tag,
                                 PostCount = 1
                             };
-                            tagCol.Insert(tagEntry);
-                        }
-                        else
-                        {
-                            tagEntry.PostCount++;
-                            tagCol.Update(tagEntry);
+                            tagCol.Insert(entry);
                         }
                     }
+
+                    tagCol.EnsureIndex(t => t.PostCount);
                 }
                 else
+                {
                     post.Tags = new string[] { };
-                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-                var result = blogPostCol.Insert(post);
+                }
+
+                var blogPostCol = db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                blogPostCol.Insert(post);
 
                 return CommandResult.SuccessResult;
             }

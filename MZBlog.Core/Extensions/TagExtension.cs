@@ -4,16 +4,17 @@ namespace MZBlog.Core.Extensions
 {
     public static class TagExtension
     {
-        private static IViewProjectionFactory _viewFac;
+        private static IViewProjectionFactory factory;
 
         public static void SetupViewProjectionFactory(IViewProjectionFactory fac)
         {
-            _viewFac = fac;
+            factory = fac;
         }
 
-        public static Tag AsTag(this string slug)
+        public static Tag AsTag(this string tag)
         {
-            return _viewFac.Get<string, Tag>(slug);
+            var slug = tag.ToSlug();
+            return factory.Get<string, Tag>(slug);
         }
     }
 }

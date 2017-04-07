@@ -46,10 +46,10 @@ namespace MZBlog.Core.ViewProjections.Home
 
         public RecentBlogPostsViewModel Project(RecentBlogPostsBindingModel input)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
                 var skip = (input.Page - 1) * input.Take;
+                var blogPostCol = db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
                 var posts = (from p in blogPostCol.FindAll()
                              where p.IsPublished
                              orderby p.PubDate descending

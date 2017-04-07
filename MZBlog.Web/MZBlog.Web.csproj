@@ -21,6 +21,7 @@
     <IISExpressUseClassicPipelineMode />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">.\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,44 +41,43 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BaseDefined">
+      <HintPath>Q:\BaseDefined.dll</HintPath>
+    </Reference>
     <Reference Include="LiteDB, Version=1.0.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\LiteDB.1.0.2\lib\net40\LiteDB.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Nancy, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nancy.1.2.0\lib\net40\Nancy.dll</HintPath>
+    <Reference Include="Nancy, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nancy.1.4.3\lib\net40\Nancy.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nancy.Hosting.Aspnet, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nancy.Hosting.Aspnet.1.2.0\lib\net40\Nancy.Hosting.Aspnet.dll</HintPath>
+    <Reference Include="Nancy.Hosting.Aspnet, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nancy.Hosting.Aspnet.1.4.1\lib\net40\Nancy.Hosting.Aspnet.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nancy.Validation.DataAnnotations, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nancy.Validation.DataAnnotations.1.2.0\lib\net40\Nancy.Validation.DataAnnotations.dll</HintPath>
+    <Reference Include="Nancy.Validation.DataAnnotations, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nancy.Validation.DataAnnotations.1.4.1\lib\net40\Nancy.Validation.DataAnnotations.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Nancy.Validation.DataAnnotations.Extensions, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nancy.Validation.DataAnnotations.Extensions.0.3.0\lib\net45\Nancy.Validation.DataAnnotations.Extensions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Nancy.ViewEngines.Razor, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Nancy.Viewengines.Razor.1.2.0\lib\net40\Nancy.ViewEngines.Razor.dll</HintPath>
+    <Reference Include="Nancy.ViewEngines.Razor, Version=1.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nancy.Viewengines.Razor.1.4.3\lib\net40\Nancy.ViewEngines.Razor.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Code\Highlight\classref.txt" />
     <Content Include="content\css\font-awesome.css" />
     <Content Include="content\css\font-awesome.min.css" />
     <Content Include="content\css\mzblog.css">
@@ -89,6 +89,80 @@
     <Content Include="content\css\mz-admin.css.map">
       <DependentUpon>mz-admin.css</DependentUpon>
     </Content>
+    <Content Include="content\bootstrap\wells.less" />
+    <Content Include="content\bootstrap\variables.less" />
+    <Content Include="content\bootstrap\utilities.less" />
+    <Content Include="content\bootstrap\type.less" />
+    <Content Include="content\bootstrap\tooltip.less" />
+    <Content Include="content\bootstrap\thumbnails.less" />
+    <Content Include="content\bootstrap\theme.less" />
+    <Content Include="content\bootstrap\tables.less" />
+    <Content Include="content\bootstrap\scaffolding.less" />
+    <Content Include="content\bootstrap\responsive-utilities.less" />
+    <Content Include="content\bootstrap\responsive-embed.less" />
+    <Content Include="content\bootstrap\progress-bars.less" />
+    <Content Include="content\bootstrap\print.less" />
+    <Content Include="content\bootstrap\popovers.less" />
+    <Content Include="content\bootstrap\panels.less" />
+    <Content Include="content\bootstrap\pagination.less" />
+    <Content Include="content\bootstrap\pager.less" />
+    <Content Include="content\bootstrap\normalize.less" />
+    <Content Include="content\bootstrap\navs.less" />
+    <Content Include="content\bootstrap\navbar.less" />
+    <Content Include="content\bootstrap\modals.less" />
+    <Content Include="content\bootstrap\mixins\vendor-prefixes.less" />
+    <Content Include="content\bootstrap\mixins\text-overflow.less" />
+    <Content Include="content\bootstrap\mixins\text-emphasis.less" />
+    <Content Include="content\bootstrap\mixins\table-row.less" />
+    <Content Include="content\bootstrap\mixins\tab-focus.less" />
+    <Content Include="content\bootstrap\mixins\size.less" />
+    <Content Include="content\bootstrap\mixins\responsive-visibility.less" />
+    <Content Include="content\bootstrap\mixins\resize.less" />
+    <Content Include="content\bootstrap\mixins\reset-text.less" />
+    <Content Include="content\bootstrap\mixins\reset-filter.less" />
+    <Content Include="content\bootstrap\mixins\progress-bar.less" />
+    <Content Include="content\bootstrap\mixins\panels.less" />
+    <Content Include="content\bootstrap\mixins\pagination.less" />
+    <Content Include="content\bootstrap\mixins\opacity.less" />
+    <Content Include="content\bootstrap\mixins\nav-vertical-align.less" />
+    <Content Include="content\bootstrap\mixins\nav-divider.less" />
+    <Content Include="content\bootstrap\mixins\list-group.less" />
+    <Content Include="content\bootstrap\mixins\labels.less" />
+    <Content Include="content\bootstrap\mixins\image.less" />
+    <Content Include="content\bootstrap\mixins\hide-text.less" />
+    <Content Include="content\bootstrap\mixins\grid-framework.less" />
+    <Content Include="content\bootstrap\mixins\grid.less" />
+    <Content Include="content\bootstrap\mixins\gradients.less" />
+    <Content Include="content\bootstrap\mixins\forms.less" />
+    <Content Include="content\bootstrap\mixins\clearfix.less" />
+    <Content Include="content\bootstrap\mixins\center-block.less" />
+    <Content Include="content\bootstrap\mixins\buttons.less" />
+    <Content Include="content\bootstrap\mixins\border-radius.less" />
+    <Content Include="content\bootstrap\mixins\background-variant.less" />
+    <Content Include="content\bootstrap\mixins\alerts.less" />
+    <Content Include="content\bootstrap\mixins.less" />
+    <Content Include="content\bootstrap\media.less" />
+    <Content Include="content\bootstrap\list-group.less" />
+    <Content Include="content\bootstrap\labels.less" />
+    <Content Include="content\bootstrap\jumbotron.less" />
+    <Content Include="content\bootstrap\input-groups.less" />
+    <Content Include="content\bootstrap\grid.less" />
+    <Content Include="content\bootstrap\glyphicons.less" />
+    <Content Include="content\bootstrap\forms.less" />
+    <Content Include="content\bootstrap\dropdowns.less" />
+    <Content Include="content\bootstrap\component-animations.less" />
+    <Content Include="content\bootstrap\code.less" />
+    <Content Include="content\bootstrap\close.less" />
+    <Content Include="content\bootstrap\carousel.less" />
+    <Content Include="content\bootstrap\buttons.less" />
+    <Content Include="content\bootstrap\button-groups.less" />
+    <Content Include="content\bootstrap\breadcrumbs.less" />
+    <Content Include="content\bootstrap\bootstrap.less" />
+    <Content Include="content\bootstrap\badges.less" />
+    <Content Include="content\bootstrap\alerts.less" />
+    <Content Include="App_Code\Highlight\README.ru.md" />
+    <Content Include="App_Code\Highlight\README.md" />
+    <Content Include="App_Code\Highlight\LICENSE" />
     <None Include="content\css\mz-admin.less" />
     <Content Include="content\css\mzblog.css.map">
       <DependentUpon>mzblog.css</DependentUpon>
@@ -133,99 +207,42 @@
     <Content Include="content\Highlight\zenburn.css" />
     <EmbeddedResource Include="ErrorHandling\Resources\404.html" />
     <Content Include="content\images\ymz.jpg" />
+    <Content Include="css\font-awesome.css" />
+    <Content Include="css\font-awesome.min.css" />
     <Content Include="favicon.ico" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="scripts\bootstrap-markdown.js" />
     <Content Include="scripts\bootstrap-markdown.zh.js" />
     <Content Include="scripts\bootstrap.js" />
     <Content Include="scripts\bootstrap.min.js" />
     <Content Include="scripts\Highlight\highlight.pack.js" />
     <Content Include="scripts\html5shiv.js" />
+    <Content Include="content\bootstrap-markdown\bootstrap-markdown.less" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.eot" />
+    <Content Include="fonts\FontAwesome.otf" />
+    <Content Include="content\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="content\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="content\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="content\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="content\fonts\fontawesome-webfont.woff2" />
     <Content Include="content\fonts\fontawesome-webfont.woff" />
     <Content Include="content\fonts\fontawesome-webfont.ttf" />
     <Content Include="content\fonts\fontawesome-webfont.eot" />
     <Content Include="content\fonts\FontAwesome.otf" />
-    <Content Include="content\fonts\glyphicons-halflings-regular.woff2" />
-    <Content Include="content\fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="content\fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="content\fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="content\bootstrap\wells.less" />
-    <Content Include="content\bootstrap\variables.less" />
-    <Content Include="content\bootstrap\utilities.less" />
-    <Content Include="content\bootstrap\type.less" />
-    <Content Include="content\bootstrap\tooltip.less" />
-    <Content Include="content\bootstrap\thumbnails.less" />
-    <Content Include="content\bootstrap\theme.less" />
-    <Content Include="content\bootstrap\tables.less" />
-    <Content Include="content\bootstrap\scaffolding.less" />
-    <Content Include="content\bootstrap\responsive-utilities.less" />
-    <Content Include="content\bootstrap\responsive-embed.less" />
-    <Content Include="content\bootstrap\progress-bars.less" />
-    <Content Include="content\bootstrap\print.less" />
-    <Content Include="content\bootstrap\popovers.less" />
-    <Content Include="content\bootstrap\panels.less" />
-    <Content Include="content\bootstrap\pagination.less" />
-    <Content Include="content\bootstrap\pager.less" />
-    <Content Include="content\bootstrap\normalize.less" />
-    <Content Include="content\bootstrap\navs.less" />
-    <Content Include="content\bootstrap\navbar.less" />
-    <Content Include="content\bootstrap\modals.less" />
-    <Content Include="content\bootstrap\mixins\vendor-prefixes.less" />
-    <Content Include="content\bootstrap\mixins\text-overflow.less" />
-    <Content Include="content\bootstrap\mixins\text-emphasis.less" />
-    <Content Include="content\bootstrap\mixins\table-row.less" />
-    <Content Include="content\bootstrap\mixins\tab-focus.less" />
-    <Content Include="content\bootstrap\mixins\size.less" />
-    <Content Include="content\bootstrap\mixins\responsive-visibility.less" />
-    <Content Include="content\bootstrap\mixins\resize.less" />
-    <Content Include="content\bootstrap\mixins\reset-filter.less" />
-    <Content Include="content\bootstrap\mixins\progress-bar.less" />
-    <Content Include="content\bootstrap\mixins\panels.less" />
-    <Content Include="content\bootstrap\mixins\pagination.less" />
-    <Content Include="content\bootstrap\mixins\opacity.less" />
-    <Content Include="content\bootstrap\mixins\nav-vertical-align.less" />
-    <Content Include="content\bootstrap\mixins\nav-divider.less" />
-    <Content Include="content\bootstrap\mixins\list-group.less" />
-    <Content Include="content\bootstrap\mixins\labels.less" />
-    <Content Include="content\bootstrap\mixins\image.less" />
-    <Content Include="content\bootstrap\mixins\hide-text.less" />
-    <Content Include="content\bootstrap\mixins\grid-framework.less" />
-    <Content Include="content\bootstrap\mixins\grid.less" />
-    <Content Include="content\bootstrap\mixins\gradients.less" />
-    <Content Include="content\bootstrap\mixins\forms.less" />
-    <Content Include="content\bootstrap\mixins\clearfix.less" />
-    <Content Include="content\bootstrap\mixins\center-block.less" />
-    <Content Include="content\bootstrap\mixins\buttons.less" />
-    <Content Include="content\bootstrap\mixins\border-radius.less" />
-    <Content Include="content\bootstrap\mixins\background-variant.less" />
-    <Content Include="content\bootstrap\mixins\alerts.less" />
-    <Content Include="content\bootstrap\mixins.less" />
-    <Content Include="content\bootstrap\media.less" />
-    <Content Include="content\bootstrap\list-group.less" />
-    <Content Include="content\bootstrap\labels.less" />
-    <Content Include="content\bootstrap\jumbotron.less" />
-    <Content Include="content\bootstrap\input-groups.less" />
-    <Content Include="content\bootstrap\grid.less" />
-    <Content Include="content\bootstrap\glyphicons.less" />
-    <Content Include="content\bootstrap\forms.less" />
-    <Content Include="content\bootstrap\dropdowns.less" />
-    <Content Include="content\bootstrap\component-animations.less" />
-    <Content Include="content\bootstrap\code.less" />
-    <Content Include="content\bootstrap\close.less" />
-    <Content Include="content\bootstrap\carousel.less" />
-    <Content Include="content\bootstrap\buttons.less" />
-    <Content Include="content\bootstrap\button-groups.less" />
-    <Content Include="content\bootstrap\breadcrumbs.less" />
-    <Content Include="content\bootstrap\bootstrap.less" />
-    <Content Include="content\bootstrap\badges.less" />
-    <Content Include="content\bootstrap\alerts.less" />
-    <Content Include="content\bootstrap-markdown\bootstrap-markdown.less" />
     <None Include="scripts\jquery-1.11.2.intellisense.js" />
     <Content Include="scripts\jquery-1.11.2.js" />
     <Content Include="scripts\jquery-1.11.2.min.js" />
+    <Content Include="scripts\jquery-1.11.2.min.map" />
+    <None Include="scripts\jquery-2.2.2.intellisense.js" />
+    <Content Include="scripts\jquery-2.2.2.js" />
+    <Content Include="scripts\jquery-2.2.2.min.js" />
     <Content Include="scripts\jquery.tagsinput.js" />
     <Content Include="scripts\jquery.unobtrusive-ajax.js" />
     <Content Include="scripts\jquery.unobtrusive-ajax.min.js" />
+    <Content Include="scripts\jquery-2.2.2.min.map" />
     <None Include="scripts\jquery.validate-vsdoc.js" />
     <Content Include="scripts\jquery.validate.js" />
     <Content Include="scripts\jquery.validate.min.js" />
@@ -239,6 +256,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Code\Highlight\Highlight.cs" />
     <Compile Include="ErrorHandling\MZBlog404Handler.cs" />
     <Compile Include="Features\CommandInvokerFactory.cs" />
     <Compile Include="Features\AppConfiguration.cs" />
@@ -259,7 +277,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Views\Account\LoginPage.cshtml" />
     <Content Include="Views\Home\Index.cshtml">
     </Content>
@@ -280,7 +300,6 @@
     <Content Include="Views\_LoginLayout.cshtml" />
     <Content Include="Views\Home\_AboutMe.cshtml" />
     <Content Include="Views\Admin\ChangeProfile.cshtml" />
-    <Content Include="scripts\jquery-1.11.2.min.map" />
     <Content Include="Views\Home\_Links.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -336,11 +355,18 @@
   <PropertyGroup>
     <PostBuildEvent>
 if $(ConfigurationName) == Debug (
-xcopy /s /y /R "$(SolutionDir)packages\Nancy.Viewengines.Razor.1.2.0\BuildProviders\Nancy.ViewEngines.Razor.BuildProviders.dll" "$(ProjectDir)bin\"
-xcopy /s /y /R "$(SolutionDir)packages\Nancy.Viewengines.Razor.1.2.0\lib\Net40\Nancy.ViewEngines.Razor.dll" "$(ProjectDir)bin\"
+xcopy /s /y /R "$(SolutionDir)packages\Nancy.Viewengines.Razor.1.4.3\BuildProviders\Nancy.ViewEngines.Razor.BuildProviders.dll" "$(ProjectDir)bin\"
+xcopy /s /y /R "$(SolutionDir)packages\Nancy.Viewengines.Razor.1.4.3\lib\Net40\Nancy.ViewEngines.Razor.dll" "$(ProjectDir)bin\"
 )</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Import Project="..\packages\Nancy.Viewengines.Razor.1.4.3\build\Nancy.ViewEngines.Razor.targets" Condition="Exists('..\packages\Nancy.Viewengines.Razor.1.4.3\build\Nancy.ViewEngines.Razor.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Nancy.Viewengines.Razor.1.4.3\build\Nancy.ViewEngines.Razor.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Nancy.Viewengines.Razor.1.4.3\build\Nancy.ViewEngines.Razor.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

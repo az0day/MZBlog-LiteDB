@@ -19,9 +19,9 @@ namespace MZBlog.Core.Commands.Posts
 
         public CommandResult Execute(DeleteCommentCommand command)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                var blogCommentCol = db.GetCollection<BlogComment>(DBTableNames.BlogComments);
                 blogCommentCol.Delete(command.CommentId);
                 return CommandResult.SuccessResult;
             }

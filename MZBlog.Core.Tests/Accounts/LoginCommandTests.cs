@@ -11,17 +11,19 @@ namespace MZBlog.Core.Tests.Accounts
         [Fact]
         public void login_should_success_if_user_in_database()
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(DataBase.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-                authorCol.Insert(new Author()
-                        {
-                            Email = "test@mz.yi",
-                            HashedPassword = Hasher.GetMd5Hash("test")
-                        });
-            }
-            var loginCommandInvoker = new LoginCommandInvoker(_dbConfig);
+                var authorCol = db.GetCollection<Author>(DBTableNames.Authors);
+                var author = new Author
+                    {
+                        Email = "test@mz.yi",
+                        HashedPassword = Hasher.GetMd5Hash("test")
+                    };
 
+                authorCol.Insert(author);
+            }
+
+            var loginCommandInvoker = new LoginCommandInvoker(DataBase);
             loginCommandInvoker.Execute(new LoginCommand
             {
                 Email = "test@mz.yi",
@@ -32,23 +34,26 @@ namespace MZBlog.Core.Tests.Accounts
         [Fact]
         public void login_should_fail_if_invalid_password_provided()
         {
-            var documtnt = new Author()
+            var documtnt = new Author
             {
                 Email = "username@mz.yi",
                 HashedPassword = Hasher.GetMd5Hash("psw1")
             };
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+
+            using (var db = new LiteDatabase(DataBase.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var authorCol = db.GetCollection<Author>(DBTableNames.Authors);
                 authorCol.Insert(documtnt);
             }
-            var loginCommandInvoker = new LoginCommandInvoker(_dbConfig);
 
-            loginCommandInvoker.Execute(new LoginCommand()
-            {
-                Email = "username@mz.yi",
-                Password = "psw2"
-            }).Success.Should().BeFalse();
+            var loginCommandInvoker = new LoginCommandInvoker(DataBase);
+            var command = new LoginCommand
+                {
+                    Email = "username@mz.yi",
+                    Password = "psw2"
+                };
+
+            loginCommandInvoker.Execute(command).Success.Should().BeFalse();
         }
     }
 }

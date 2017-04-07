@@ -33,19 +33,19 @@ namespace MZBlog.Core.ViewProjections.Admin
 
         public AllStatisticsViewModel Project(AllStatisticsBindingModel input)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var blogPostCol = db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
                 var postCount = blogPostCol.Count();
                 if (postCount == 0)
                     return new AllStatisticsViewModel();
-                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                var blogCommentCol = db.GetCollection<BlogComment>(DBTableNames.BlogComments);
                 var stat = new AllStatisticsViewModel
                 {
                     PostsCount = postCount,
                     CommentsCount = blogCommentCol.Count()
                 };
-                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
+                var tagCol = db.GetCollection<Tag>(DBTableNames.Tags);
                 stat.TagsCount = tagCol.Count();
 
                 return stat;

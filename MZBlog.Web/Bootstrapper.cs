@@ -19,8 +19,10 @@ namespace MZBlog.Web
         protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
         {
             base.ApplicationStartup(container, pipelines);
+
             StaticConfiguration.Caching.EnableRuntimeViewUpdates = true;
             StaticConfiguration.DisableErrorTraces = false;
+
             pipelines.OnError += ErrorHandler;
         }
 
@@ -41,15 +43,19 @@ namespace MZBlog.Web
             container.Register(typeof(ICache), typeof(RuntimeCache));
 
             RegisterIViewProjections(container);
+
             TagExtension.SetupViewProjectionFactory(container.Resolve<IViewProjectionFactory>());
+
             RegisterICommandInvoker(container);
-            container.Register<Config>(this.Config);
+
+            container.Register(Config);
             //container.Register(typeof(MongoDatabase), (cContainer, overloads) => Database);
         }
 
         protected override void ConfigureConventions(NancyConventions nancyConventions)
         {
             base.ConfigureConventions(nancyConventions);
+
             nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("scripts"));
             nancyConventions.StaticContentsConventions.Add(StaticContentConventionBuilder.AddDirectory("content"));
         }
@@ -62,7 +68,7 @@ namespace MZBlog.Web
             {
                 if (_config == null)
                 {
-                    string dbDir = Path.Combine(this.RootPathProvider.GetRootPath(), "App_Data", "litedb");
+                    var dbDir = Path.Combine(RootPathProvider.GetRootPath(), "App_Data", "litedb");
                     if (!Directory.Exists(dbDir))
                     {
                         Directory.CreateDirectory(dbDir);
@@ -76,22 +82,22 @@ namespace MZBlog.Web
 
         public static void RegisterICommandInvoker(TinyIoCContainer container)
         {
-            var commandInvokerTypes = Assembly.GetAssembly(typeof(ICommandInvoker<,>))
-                                              .DefinedTypes
-                                              .Select(t => new
-                                              {
-                                                  Type = t.AsType(),
-                                                  Interface = t.ImplementedInterfaces.FirstOrDefault(
-                                                      i =>
-                                                      i.IsGenericType() &&
-                                                      i.GetGenericTypeDefinition() == typeof(ICommandInvoker<,>))
-                                              })
-                                              .Where(t => t.Interface != null)
-                                              .ToArray();
+            var invokers = Assembly.GetAssembly(typeof(ICommandInvoker<,>))
+                .DefinedTypes
+                .Select(t => new
+                    {
+                        Type = t.AsType(),
+                        Interface = t.ImplementedInterfaces.FirstOrDefault(i =>
+                            i.IsGenericType() &&
+                            i.GetGenericTypeDefinition() == typeof(ICommandInvoker<,>)
+                        )
+                    })
+                .Where(t => t.Interface != null)
+                .ToArray();
 
-            foreach (var commandInvokerType in commandInvokerTypes)
+            foreach (var invoker in invokers)
             {
-                container.Register(commandInvokerType.Interface, commandInvokerType.Type);
+                container.Register(invoker.Interface, invoker.Type);
             }
 
             container.Register(typeof(ICommandInvokerFactory), (cContainer, overloads) => new CommandInvokerFactory(cContainer));
@@ -99,22 +105,22 @@ namespace MZBlog.Web
 
         public static void RegisterIViewProjections(TinyIoCContainer container)
         {
-            var viewProjectionTypes = Assembly.GetAssembly(typeof(IViewProjection<,>))
-                                              .DefinedTypes
-                                              .Select(t => new
-                                                               {
-                                                                   Type = t.AsType(),
-                                                                   Interface = t.ImplementedInterfaces.FirstOrDefault(
-                                                                       i =>
-                                                                       i.IsGenericType() &&
-                                                                       i.GetGenericTypeDefinition() == typeof(IViewProjection<,>))
-                                                               })
-                                              .Where(t => t.Interface != null)
-                                              .ToArray();
+            var invokers = Assembly.GetAssembly(typeof(IViewProjection<,>))
+                .DefinedTypes
+                .Select(t => new
+                    {
+                        Type = t.AsType(),
+                        Interface = t.ImplementedInterfaces.FirstOrDefault(i =>
+                            i.IsGenericType() &&
+                            i.GetGenericTypeDefinition() == typeof(IViewProjection<,>)
+                        )
+                    })
+                .Where(t => t.Interface != null)
+                .ToArray();
 
-            foreach (var viewProjectionType in viewProjectionTypes)
+            foreach (var invoker in invokers)
             {
-                container.Register(viewProjectionType.Interface, viewProjectionType.Type);
+                container.Register(invoker.Interface, invoker.Type);
             }
 
             container.Register(typeof(IViewProjectionFactory), (cContainer, overloads) => new ViewProjectionFactory(cContainer));

@@ -1,4 +1,7 @@
-﻿using Pinyin4net;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using Pinyin4net;
 using Pinyin4net.Format;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -31,13 +34,13 @@ namespace MZBlog.Core.Extensions
         {
             value = value.ToLowerInvariant();
 
-            value = ConvertChineseToPY(value);
+            value = ConvertChinesePinYin(value);
 
             value = value.Replace("#", "-sharp ").Replace("@", "-at ")
                          .Replace("$", "-dollar ").Replace("%", "-percent ")
                          .Replace("&", "-and ").Replace("||", "-or ");
 
-            value = Regex.Replace(value.TrimEnd(), @"\s", "-", RegexOptions.Compiled);
+            value = Regex.Replace(value.TrimEnd(), @"\s+", "-", RegexOptions.Compiled);
 
             value = Regex.Replace(value, @"[^a-z0-9\s-_]", "", RegexOptions.Compiled);
 
@@ -48,9 +51,33 @@ namespace MZBlog.Core.Extensions
             return value;
         }
 
-        private static string ConvertChineseToPY(string value)
+        public static IDictionary<string, string> AsTags(this string tags)
         {
-            return Regex.Replace(value, "[\u4e00-\u9fa5]", (m) => string.Format(" {0} ", m.Value.ChsToPinYin()));
+            if (string.IsNullOrWhiteSpace(tags))
+            {
+                return new Dictionary<string, string>();
+            }
+
+            var items = new Dictionary<string, string>();
+            var array = tags.Split(new []{','}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var item in array)
+            {
+                var tag = item.Trim();
+                var slug = tag.ToSlug();
+                if (items.ContainsKey(slug))
+                {
+                    continue;
+                }
+
+                items.Add(slug, tag);
+            }
+
+            return items;
+        }
+
+        private static string ConvertChinesePinYin(string value)
+        {
+            return Regex.Replace(value, "[\u4e00-\u9fa5]", m => string.Format(" {0} ", m.Value.ChsToPinYin()));
         }
 
         #region 汉字转拼音
@@ -67,7 +94,7 @@ namespace MZBlog.Core.Extensions
             var nowchar = chs.ToCharArray();
             for (var j = 0; j < nowchar.Length; j++)
             {
-                if (myRegex.IsMatch(nowchar[j].ToString()))
+                if (myRegex.IsMatch(nowchar[j].ToString(CultureInfo.InvariantCulture)))
                 {
                     var pingStrs = PinyinHelper.ToHanyuPinyinStringArray(nowchar[j], format);
                     if (pingStrs.Any())
@@ -75,11 +102,11 @@ namespace MZBlog.Core.Extensions
                         returnstr += pingStrs[0];
                     }
                     else
-                        returnstr += nowchar[j].ToString();
+                        returnstr += nowchar[j].ToString(CultureInfo.InvariantCulture);
                 }
                 else
                 {
-                    returnstr += nowchar[j].ToString();
+                    returnstr += nowchar[j].ToString(CultureInfo.InvariantCulture);
                 }
             }
             return returnstr;

@@ -1,7 +1,8 @@
 ﻿using FluentAssertions;
+using MZBlog.Core.Extensions;
 using Xunit;
 
-namespace MZBlog.Core.Extensions.Tests
+namespace MZBlog.Core.Tests.Extensions
 {
     public class StringExtensionsTests
     {

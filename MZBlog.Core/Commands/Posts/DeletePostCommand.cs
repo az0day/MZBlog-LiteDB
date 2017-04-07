@@ -19,12 +19,30 @@ namespace MZBlog.Core.Commands.Posts
 
         public CommandResult Execute(DeletePostCommand command)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
-                blogCommentCol.Delete(x => x.PostId == command.PostId);
-                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-                blogPostCol.Delete(x => x.Id == command.PostId);
+                var posts = db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var post = posts.FindById(command.PostId);
+                if (post != null)
+                {
+                    var tags = db.GetCollection<Tag>(DBTableNames.Tags);
+                    foreach (var slug in post.Tags)
+                    {
+                        string slug1 = slug;
+                        var tagEntry = tags.FindOne(x => x.Slug.Equals(slug1));
+                        if (tagEntry != null)
+                        {
+                            tagEntry.PostCount--;
+                            tags.Update(tagEntry);
+                        }
+                    }
+                }
+
+                // remove
+                posts.Delete(x => x.Id == command.PostId);
+
+                var comments = db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                comments.Delete(x => x.PostId == command.PostId);
 
                 return CommandResult.SuccessResult;
             }
