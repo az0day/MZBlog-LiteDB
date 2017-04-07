@@ -18,11 +18,10 @@ namespace MZBlog.Core.Commands.Accounts
     public class LoginCommandResult : CommandResult
     {
         public LoginCommandResult()
-            : base()
         { }
 
-        public LoginCommandResult(string trrorMessage)
-            : base(trrorMessage)
+        public LoginCommandResult(string errorMessage)
+            : base(errorMessage)
         { }
 
         public Author Author { get; set; }
@@ -40,9 +39,9 @@ namespace MZBlog.Core.Commands.Accounts
         public LoginCommandResult Execute(LoginCommand loginCommand)
         {
             var hashedPassword = Hasher.GetMd5Hash(loginCommand.Password);
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var authorCol = db.GetCollection<Author>(DBTableNames.Authors);
                 if (!authorCol.Exists(Query.All()))
                 {
                     authorCol.Insert(new Author
@@ -56,9 +55,9 @@ namespace MZBlog.Core.Commands.Accounts
                 var author = authorCol.FindOne(x => x.Email == loginCommand.Email && x.HashedPassword == hashedPassword);
 
                 if (author != null)
-                    return new LoginCommandResult() { Author = author };
+                    return new LoginCommandResult { Author = author };
 
-                return new LoginCommandResult(trrorMessage: "用户名或密码不正确") { };
+                return new LoginCommandResult("用户名或密码不正确");
             }
         }
     }

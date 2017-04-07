@@ -40,19 +40,20 @@ namespace MZBlog.Core
             _dbConfig = dbConfig;
         }
 
-        public string CreateTick(string key)
+        public string CreateTick(string slug)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
                 var tick = ObjectId.NewObjectId().ToString();
-                var spamHash = new SpamHash
+                var entry = new SpamHash
                 {
                     Id = tick,
-                    PostKey = key,
+                    PostKey = slug,
                     CreatedTime = DateTime.UtcNow
                 };
-                var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
-                spamHashCol.Insert(spamHash);
+
+                var cols = db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+                cols.Insert(entry);
                 return tick;
             }
         }
@@ -61,38 +62,46 @@ namespace MZBlog.Core
         {
             var nonhash = string.Empty;
             if (tick.IsNullOrWhitespace())
-                return nonhash;
-
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
-                var spamHash = spamHashCol.FindOne(x => x.PostKey == tick);
+                return nonhash;
+            }
 
-                if (spamHash == null || spamHash.Pass || !spamHash.Hash.IsNullOrWhitespace())
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var cols = db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+                var entry = cols.FindOne(x => x.Id == tick);
+
+                if (entry == null || entry.Pass || !entry.Hash.IsNullOrWhitespace())
+                {
                     return nonhash;
+                }
 
-                spamHash.Hash = new Random().NextDouble().ToString();
-                spamHashCol.Update(spamHash);
-
-                return spamHash.Hash;
+                entry.Hash = ObjectId.NewObjectId().ToString();
+                cols.Update(entry);
+                
+                return entry.Hash;
             }
         }
 
         public bool IsSpam(SpamShield command)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
                 if (command.Tick.IsNullOrWhitespace() || command.Hash.IsNullOrWhitespace())
+                {
                     return true;
+                }
 
-                var spamHashCol = _db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
-                var spamHash = spamHashCol.FindOne(x => x.PostKey == command.Tick);
+                var cols = db.GetCollection<SpamHash>(DBTableNames.SpamHashes);
+                var entry = cols.FindOne(x => x.Id == command.Tick);
 
-                if (spamHash == null || spamHash.Pass || spamHash.Hash != command.Hash)
+                if (entry == null || entry.Pass || entry.Hash != command.Hash)
+                {
                     return true;
+                }
 
-                spamHash.Pass = true;
-                spamHashCol.Update(spamHash);
+                entry.Pass = true;
+                cols.Update(entry);
                 return false;
             }
         }

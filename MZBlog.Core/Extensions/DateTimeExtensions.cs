@@ -16,9 +16,9 @@ namespace MZBlog.Core.Extensions
         {
             //var cnOffset = TimeZoneInfo.FindSystemTimeZoneById("Asia/Shanghai").BaseUtcOffset;
             //var cnUTC = dt.Add(cnOffset);
-            var cnUTC = dt.AddHours(8);
-            var cnDT = new DateTime(cnUTC.Year, cnUTC.Month, cnUTC.Day, cnUTC.Hour, cnUTC.Minute, cnUTC.Second, cnUTC.Millisecond, DateTimeKind.Unspecified);
-            return cnDT;
+            var cnUtc = dt.AddHours(8);
+            var cnDt = new DateTime(cnUtc.Year, cnUtc.Month, cnUtc.Day, cnUtc.Hour, cnUtc.Minute, cnUtc.Second, cnUtc.Millisecond, DateTimeKind.Unspecified);
+            return cnDt;
         }
     }
 }

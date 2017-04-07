@@ -23,9 +23,9 @@ namespace MZBlog.Core.Commands.Accounts
 
         public CommandResult Execute(ChangeProfileCommand command)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var authorCol = db.GetCollection<Author>(DBTableNames.Authors);
                 var author = authorCol.FindById(command.AuthorId);
                 if (author == null)
                     return new CommandResult("用户信息不存在");

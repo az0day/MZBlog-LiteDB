@@ -2,6 +2,7 @@
 using MZBlog.Core.Documents;
 using System.Collections.Generic;
 using System.Linq;
+using MZBlog.Core.Extensions;
 
 namespace MZBlog.Core.ViewProjections.Home
 {
@@ -28,22 +29,44 @@ namespace MZBlog.Core.ViewProjections.Home
 
         public TaggedBlogPostsViewModel Project(TaggedBlogPostsBindingModel input)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            if (string.IsNullOrWhiteSpace(input.Tag))
             {
-                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-                var posts = (from p in blogPostCol.FindAll()
-                             where p.IsPublished && p.Tags.Contains(input.Tag)
-                             orderby p.PubDate descending
-                             select p)
-                         .ToList();
+                return null;
+            }
+
+            var slug = input.Tag.ToSlug();
+            if (string.IsNullOrWhiteSpace(slug))
+            {
+                return null;
+            }
+
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
+            {
+                var blogPostCol = db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var posts = (
+                    from p in blogPostCol.FindAll()
+                    where p.IsPublished && p.Tags.Contains(slug)
+                    orderby p.PubDate descending
+                    select p
+                ).ToList();
+
                 if (posts.Count == 0)
+                {
                     return null;
-                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
-                var tagName = tagCol.FindOne(x => x.Slug == input.Tag).Name;
+                }
+
+                var tags = db.GetCollection<Tag>(DBTableNames.Tags);
+                var text = "Unknown";
+                var tag = tags.FindOne(x => x.Slug.Equals(slug));
+                if (tag != null)
+                {
+                    text = tag.Name;
+                }
+
                 return new TaggedBlogPostsViewModel
                 {
                     Posts = posts,
-                    Tag = tagName
+                    Tag = text
                 };
             }
         }

@@ -63,10 +63,10 @@ namespace MZBlog.Core.Commands.Posts
                 SiteUrl = command.SiteUrl,
                 CreatedTime = DateTime.UtcNow
             };
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var blogCommentCol = _db.GetCollection<BlogComment>(DBTableNames.BlogComments);
-                var result = blogCommentCol.Insert(comment);
+                var blogCommentCol = db.GetCollection<BlogComment>(DBTableNames.BlogComments);
+                blogCommentCol.Insert(comment);
 
                 return CommandResult.SuccessResult;
             }

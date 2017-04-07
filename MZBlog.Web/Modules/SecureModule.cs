@@ -46,9 +46,13 @@ namespace MZBlog.Web.Modules
             var username = FormsAuthentication.GetAuthUsernameFromCookie(ctx);
 
             if (username.IsNullOrWhitespace())
-                return ctx.GetRedirect("/mz-login?returnUrl=" + Request.Url.Path).WithCookie(FormsAuthentication.CreateLogoutCookie());
+            {
+                var url = string.Format("/mz-login?returnUrl={0}", Request.Url.Path);
+                var cookie = FormsAuthentication.CreateLogoutCookie();
+                return ctx.GetRedirect(url).WithCookie(cookie);
+            }
 
-            ctx.CurrentUser = new BlogUserIdentity(username, new string[] { "admin" });
+            ctx.CurrentUser = new BlogUserIdentity(username, new [] { "admin" });
 
             return null;
         }

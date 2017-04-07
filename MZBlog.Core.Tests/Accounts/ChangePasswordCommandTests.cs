@@ -8,24 +8,26 @@ namespace MZBlog.Core.Tests.Accounts
 {
     public class ChangePasswordCommandTests : LiteDBBackedTest
     {
-        private string authorId = "mzyi";
+        private const string AUTHOR_ID = "mzyi";
 
         [Fact]
         public void change_password_fail_if_old_password_does_not_match()
         {
-            var author = new Author()
+            var author = new Author
             {
-                Id = authorId,
+                Id = AUTHOR_ID,
                 Email = "test@mz.yi",
                 HashedPassword = Hasher.GetMd5Hash("mzblog")
             };
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+
+            using (var db = new LiteDatabase(DataBase.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var authorCol = db.GetCollection<Author>(DBTableNames.Authors);
                 authorCol.Insert(author);
             }
-            new ChangePasswordCommandInvoker(_dbConfig)
-               .Execute(new ChangePasswordCommand()
+
+            new ChangePasswordCommandInvoker(DataBase)
+               .Execute(new ChangePasswordCommand
                {
                    AuthorId = author.Id,
                    OldPassword = "wrong psw",
@@ -38,36 +40,41 @@ namespace MZBlog.Core.Tests.Accounts
         [Fact]
         public void change_password()
         {
-            var author = new Author()
+            var author = new Author
             {
                 Email = "test@mz.yi",
                 HashedPassword = Hasher.GetMd5Hash("mzblog")
             };
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+
+            using (var db = new LiteDatabase(DataBase.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-                authorCol.Insert(author);
+                var authors = db.GetCollection<Author>(DBTableNames.Authors);
+                authors.Insert(author);
+            }
 
-                new ChangePasswordCommandInvoker(_dbConfig)
-                    .Execute(new ChangePasswordCommand()
-                    {
-                        AuthorId = author.Id,
-                        OldPassword = "mzblog",
-                        NewPassword = "pswtest",
-                        NewPasswordConfirm = "pswtest"
-                    })
-                    .Success.Should().BeTrue();
+            new ChangePasswordCommandInvoker(DataBase)
+                 .Execute(new ChangePasswordCommand
+                 {
+                     AuthorId = author.Id,
+                     OldPassword = "mzblog",
+                     NewPassword = "pswtest",
+                     NewPasswordConfirm = "pswtest"
+                 })
+                 .Success.Should().BeTrue();
 
-                authorCol.FindById(author.Id).HashedPassword.Should().BeEquivalentTo(Hasher.GetMd5Hash("pswtest"));
+            using (var db = new LiteDatabase(DataBase.DbPath))
+            {
+                var authors = db.GetCollection<Author>(DBTableNames.Authors);
+                authors.FindById(author.Id).HashedPassword.Should().BeEquivalentTo(Hasher.GetMd5Hash("pswtest"));
             }
         }
 
         ~ChangePasswordCommandTests()
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(DataBase.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
-                authorCol.Delete(authorId);
+                var authorCol = db.GetCollection<Author>(DBTableNames.Authors);
+                authorCol.Delete(AUTHOR_ID);
             }
         }
     }

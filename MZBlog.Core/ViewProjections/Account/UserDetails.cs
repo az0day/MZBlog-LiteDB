@@ -14,9 +14,9 @@ namespace MZBlog.Core.ViewProjections.Account
 
         public Author Project(string input)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var authorCol = _db.GetCollection<Author>(DBTableNames.Authors);
+                var authorCol = db.GetCollection<Author>(DBTableNames.Authors);
                 return authorCol.FindById(input);
             }
         }

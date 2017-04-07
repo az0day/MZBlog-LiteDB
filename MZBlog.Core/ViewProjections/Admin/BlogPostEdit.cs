@@ -24,10 +24,10 @@ namespace MZBlog.Core.ViewProjections.Admin
 
         public BlogPostEditViewModel Project(BlogPostEditBindingModel input)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
-                var post = blogPostCol.FindById(input.PostId);
+                var posts = db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var post = posts.FindById(input.PostId);
                 return new BlogPostEditViewModel { BlogPost = post };
             }
         }

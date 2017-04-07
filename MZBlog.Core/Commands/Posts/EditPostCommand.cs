@@ -1,4 +1,7 @@
-﻿using LiteDB;
+﻿using System.Text;
+using Kiwi.Markdown;
+using Kiwi.Markdown.ContentProviders;
+using LiteDB;
 using MZBlog.Core.Documents;
 using MZBlog.Core.Extensions;
 using System;
@@ -36,20 +39,23 @@ namespace MZBlog.Core.Commands.Posts
 
         public CommandResult Execute(EditPostCommand command)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var blogPostCol = _db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
+                var blogPostCol = db.GetCollection<BlogPost>(DBTableNames.BlogPosts);
                 var post = blogPostCol.FindById(command.PostId);
 
                 if (post == null)
+                {
                     throw new ApplicationException("Post with id: {0} was not found".FormatWith(command.PostId));
+                }
+
                 if (post.Tags != null)
                 {
-                    var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
+                    var tagCol = db.GetCollection<Tag>(DBTableNames.Tags);
                     foreach (var tag in post.Tags)
                     {
                         var slug = tag.ToSlug();
-                        var tagEntry = tagCol.FindOne(x => x.Slug == slug);
+                        var tagEntry = tagCol.FindOne(x => x.Slug.Equals(slug));
                         if (tagEntry != null)
                         {
                             tagEntry.PostCount--;
@@ -58,45 +64,54 @@ namespace MZBlog.Core.Commands.Posts
                     }
                 }
 
-                var markdown = new MarkdownSharp.Markdown();
+                var contentProvider = new FileContentProvider(null, Encoding.UTF8);
+                var parser = new MarkdownService(contentProvider);
+                var content = parser.ToHtml(command.MarkDown);
                 //TODO:应该验证TitleSlug是否是除了本文外唯一的
 
                 post.MarkDown = command.MarkDown;
-                post.Content = markdown.Transform(command.MarkDown);
+                post.Content = content;
                 post.PubDate = command.PubDate.CloneToUtc();
                 post.Status = command.Published ? PublishStatus.Published : PublishStatus.Draft;
                 post.Title = command.Title;
                 post.TitleSlug = command.TitleSlug.Trim().ToSlug();
+
                 if (!command.Tags.IsNullOrWhitespace())
                 {
-                    var tags = command.Tags.Trim().Split(',').Select(s => s.Trim());
-                    post.Tags = tags.Select(s => s.ToSlug()).ToArray();
-                    var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
-                    foreach (var tag in tags)
+                    var tags = command.Tags.AsTags();
+                    post.Tags = tags.Keys.ToArray();
+                    
+                    var tagCol = db.GetCollection<Tag>(DBTableNames.Tags);
+                    foreach (var kv in tags)
                     {
-                        var slug = tag.ToSlug();
-                        var tagEntry = tagCol.FindOne(x => x.Slug == slug);
-                        if (tagEntry == null)
+                        var slug = kv.Key;
+                        var tag = kv.Value;
+
+                        var entry = tagCol.FindOne(x => x.Slug.Equals(slug));
+                        if (entry != null)
                         {
-                            tagEntry = new Tag
-                            {
-                                Slug = slug,
-                                Name = tag,
-                                PostCount = 1
-                            };
-                            tagCol.Insert(tagEntry);
+                            entry.PostCount++;
+                            tagCol.Update(entry);
                         }
                         else
                         {
-                            tagEntry.PostCount++;
-                            tagCol.Update(tagEntry);
+                            entry = new Tag
+                                {
+                                    Id = ObjectId.NewObjectId(),
+                                    Slug = slug,
+                                    Name = tag,
+                                    PostCount = 1
+                                };
+                            tagCol.Insert(entry);
                         }
                     }
                 }
                 else
+                {
                     post.Tags = new string[] { };
-                _db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Update(post);
+                }
 
+                db.GetCollection<BlogPost>(DBTableNames.BlogPosts).Update(post);
                 return CommandResult.SuccessResult;
             }
         }

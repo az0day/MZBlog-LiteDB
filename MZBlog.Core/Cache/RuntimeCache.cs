@@ -14,18 +14,18 @@ namespace MZBlog.Core.Cache
             _defaultCacheItemPolicy = new CacheItemPolicy { SlidingExpiration = TimeSpan.FromSeconds(60 * 2) };
         }
 
-        public void Add(string key, object obj)
+        public void Add<T>(string key, T obj)
         {
             var cacheItem = new CacheItem(key, obj);
             _cache.Set(cacheItem, _defaultCacheItemPolicy);
         }
 
-        public void Add(string key, object obj, int seconds)
+        public void Add<T>(string key, T obj, int seconds)
         {
             _cache.Set(key, obj, DateTimeOffset.Now.AddSeconds(seconds));
         }
 
-        public void Add(string key, object obj, TimeSpan slidingExpiration)
+        public void Add<T>(string key, T obj, TimeSpan slidingExpiration)
         {
             var cacheItem = new CacheItem(key, obj);
             var cacheItemPolicy = new CacheItemPolicy { SlidingExpiration = slidingExpiration };
@@ -42,7 +42,7 @@ namespace MZBlog.Core.Cache
             return (T)_cache.Get(key);
         }
 
-        public void Max(string key, object obj)
+        public void Max<T>(string key, T obj)
         {
             var cacheItem = new CacheItem(key, obj);
             var cacheItemPolicy = new CacheItemPolicy { AbsoluteExpiration = DateTime.MaxValue.AddYears(-1), Priority = CacheItemPriority.NotRemovable };
@@ -56,11 +56,11 @@ namespace MZBlog.Core.Cache
 
         public bool Test()
         {
-            const string key = "_##**Test**##_";
-            const string obj = "Test";
-            Add(key, obj);
-            var result = Get<string>(key);
-            return result == obj;
+            const string KEY = "_##**Test**##_";
+            const string OBJ = "Test";
+            Add(KEY, OBJ);
+            var result = Get<string>(KEY);
+            return result == OBJ;
         }
     }
 }

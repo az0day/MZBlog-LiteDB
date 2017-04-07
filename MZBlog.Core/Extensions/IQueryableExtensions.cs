@@ -2,7 +2,7 @@
 
 namespace MZBlog.Core.Extensions
 {
-    public static class IQueryableExtensions
+    public static class QueryableExtensions
     {
         public static IQueryable<T> TakePage<T>(this IQueryable<T> queryable, int page = 1, int pageSize = 10)
         {

@@ -34,11 +34,10 @@ namespace MZBlog.Core.ViewProjections.Home
 
         public TagCloudViewModel Project(TagCloudBindingModel input)
         {
-            using (var _db = new LiteDatabase(_dbConfig.DbPath))
+            using (var db = new LiteDatabase(_dbConfig.DbPath))
             {
-                var tagCol = _db.GetCollection<Tag>(DBTableNames.Tags);
-                var result = new Dictionary<Tag, int>();
-                var tags = tagCol.FindAll().OrderByDescending(x => x.PostCount);
+                var tagCol = db.GetCollection<Tag>(DBTableNames.Tags);
+                var tags = tagCol.FindAll().OrderByDescending(x => x.PostCount).ToArray();
 
                 return new TagCloudViewModel
                 {

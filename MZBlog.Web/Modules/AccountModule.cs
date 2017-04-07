@@ -46,8 +46,7 @@ namespace MZBlog.Web.Modules
             {
                 var cookie = FormsAuthentication.CreateAuthCookie(commandResult.Author.Id);
                 var response = Context.GetRedirect(loginCommand.ReturnUrl ?? "/mz-admin");
-                response.WithCookie(cookie);
-                return response;
+                return response.WithCookie(cookie);
             }
 
             return View["LoginPage", commandResult.GetErrors()];
